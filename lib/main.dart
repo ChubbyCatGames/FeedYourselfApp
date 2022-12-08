@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  final List<String> entries = <String>['A', 'B', 'C'];
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -77,47 +78,52 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(widget.title),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.dark_mode,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
+          ]),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(8),
+        itemCount: entries.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            height: 100,
+            child: Row(
+              children: [
+                Image(
+                  image: NetworkImage(
+                      "https://www.gstatic.com/webp/gallery/1.jpg"),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Entry ${entries[index]}',
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
       ),
+
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add_a_photo_outlined),
       ), // This trailing comma makes auto-formatting nicer for build methods.
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.access_time_outlined),
