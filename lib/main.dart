@@ -1,6 +1,8 @@
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/services.dart';
+import 'package:comida/page/notes_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:openfoodfacts/openfoodfacts.dart';
