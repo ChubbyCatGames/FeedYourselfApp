@@ -10,6 +10,12 @@ import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:openfoodfacts/model/OcrIngredientsResult.dart';
 import 'package:openfoodfacts/utils/TagType.dart';
 
+
+import 'dart:math' as math;
+
+import 'package:go_router/go_router.dart';
+import 'package:english_words/english_words.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -289,3 +295,319 @@ class _MyHomePageState extends State<MyHomePage> {
         input: 'Tun', language: OpenFoodFactsLanguage.FRENCH);
   }
 }
+
+
+
+
+class MusicAppDemo extends StatelessWidget {
+  MusicAppDemo({Key? key}) : super(key: key);
+  
+  
+  final GoRouter _router = GoRouter(
+    initialLocation: '/recents',
+    routes: <RouteBase>[
+      ShellRoute(
+        builder: (BuildContext context, GoRouterState state, Widget child) {
+          return MusicAppShell(
+            child: child,
+          );
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/recents',
+            pageBuilder: (context, state) {
+              return FadeTransitionPage(
+                child: const RecentsScreen(),
+                key: state.pageKey,
+              );
+            },
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'product/:productId',
+                builder: (BuildContext context, GoRouterState state) {
+                  return ProductScreen(
+                    productId: state.params['productId'],
+                  );
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/alergies',
+            pageBuilder: (context, state) {
+              return FadeTransitionPage(
+                child: const AlergiesScreen(),
+                key: state.pageKey,
+              );
+            },
+          ),
+        ],
+      ),
+    ],
+  );
+  
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Music app',
+      theme: ThemeData(primarySwatch: Colors.pink),
+      routerConfig: _router,
+      /*builder: (context, child) {
+        return MusicDatabaseScope(
+          state: database,
+          child: child!,
+        );
+      },*/
+    );
+  }
+}
+
+class MusicAppShell extends StatelessWidget {
+  final Widget child;
+  
+  const MusicAppShell({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+  
+  
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.my_library_music_rounded),
+            label: 'Recents',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timelapse),
+            label: 'Alergies',
+          ),
+        ],
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (int idx) => _onItemTapped(idx, context),
+      ),
+    );
+  }
+  
+  static int _calculateSelectedIndex(BuildContext context) {
+    final GoRouter route = GoRouter.of(context);
+    final String location = route.location;
+    if (location.startsWith('/alergies')) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+  
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 1:
+        GoRouter.of(context).go('/alergies');
+        break;
+      case 0:
+      default:
+        GoRouter.of(context).go('/recents');
+        break;
+    }
+  }
+}
+
+
+///--------------------SCREENS--------------------
+
+class RecentsScreen extends StatelessWidget {
+  const RecentsScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recents'),
+      ),
+      body: ListView.builder(
+        itemBuilder: (context, productId) {
+          final product = Producto ('01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
+          return ProductTile(
+            product: product,
+            onTap: () {
+              GoRouter.of(context).go('/recents/product/$productId');
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AlergiesScreen extends StatelessWidget {
+  const AlergiesScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Alergies'),
+      ),
+      body: ListView.builder(
+        itemBuilder: (context, index) {
+          final allergy =Allergy ('01011233F', 'TestProduct', Color.fromARGB(255, 0, 0, 0));
+          return AllergyTile(
+            allergy: allergy,
+            onTap: () {
+              
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ProductScreen extends StatelessWidget {
+  final String? productId;
+
+  const ProductScreen({
+    required this.productId,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final product = Producto ('01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Product - ${product.name}'),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Container(
+                    color: product.color,
+                    margin: const EdgeInsets.all(8),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    Text(
+                      product.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+///-------------------------------------
+
+///-------------------TILES----------------
+class Producto {
+  final String id;
+  final String name;
+  final String brand;
+  final Color color;
+
+  Producto(this.id, this.name, this.brand, this.color);
+}
+
+class Allergy {
+  final String id;
+  final String name;
+  final Color color;
+
+  Allergy(this.id, this.name, this.color);
+
+  String get fullId => '$name-$id';
+}
+
+class ProductTile extends StatelessWidget {
+  final Producto product;
+  final VoidCallback? onTap;
+
+  const ProductTile({Key? key, required this.product, this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: SizedBox(
+        width: 50,
+        height: 50,
+        child: Container(
+          color: product.color,
+        ),
+      ),
+      title: Text(product.name),
+      subtitle: Text(product.brand),
+      onTap: onTap,
+    );
+  }
+}
+
+  class AllergyTile extends StatelessWidget {
+  final Allergy allergy;
+  final VoidCallback? onTap;
+
+  const AllergyTile({Key? key, required this.allergy, this.onTap})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: SizedBox(
+        width: 50,
+        height: 50,
+        child: Container(
+          color: allergy.color,
+          margin: const EdgeInsets.all(8),
+        ),
+      ),
+      title: Text(allergy.name),
+      onTap: onTap,
+    );
+  }
+}
+ 
+  ///-----------------------------------
+  
+
+
+class FadeTransitionPage extends CustomTransitionPage<void> {
+  
+  FadeTransitionPage({
+    required LocalKey key,
+    required Widget child,
+  }) : super(
+      key: key,
+      transitionsBuilder: (BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child) =>
+          FadeTransition(
+            opacity: animation.drive(_curveTween),
+            child: child,
+          ),
+      child: child);
+
+  static final CurveTween _curveTween = CurveTween(curve: Curves.easeIn);
+}
+
