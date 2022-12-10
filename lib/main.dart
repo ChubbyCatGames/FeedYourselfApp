@@ -20,14 +20,20 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool dark = false;
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Feed Yourself',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: lightColorScheme,
@@ -38,7 +44,21 @@ class MyApp extends StatelessWidget {
         colorScheme: darkColorScheme,
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const MyHomePage(title: 'Feed Yourself'),
+      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+      home: Scaffold(
+          appBar: AppBar(title: Text("Feed Yourself"), actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  dark = !dark;
+                });
+              },
+              icon: Icon(
+                Icons.dark_mode,
+              ),
+            )
+          ]),
+          body: const MyHomePage(title: 'Feed Yourself')),
     );
   }
 }
@@ -76,8 +96,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final List<String> entries = <String>['A', 'B', 'C'];
+
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -85,26 +107,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          actions: <Widget>[
-            IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.dark_mode,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
-          ]),
+      backgroundColor: colors.background,
       body: ListView.separated(
         padding: const EdgeInsets.all(8),
         itemCount: entries.length,
         itemBuilder: (BuildContext context, int index) {
           return Container(
-            color: Theme.of(context).colorScheme.secondaryContainer,
+            color: colors.secondaryContainer,
             height: 100,
             child: Row(
               children: [
@@ -116,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(
                   'Entry ${entries[index]}',
                   textAlign: TextAlign.center,
+                  style: TextStyle(color: colors.onSecondaryContainer),
                 ),
               ],
             ),
@@ -125,13 +135,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        backgroundColor: colors.tertiaryContainer,
+        onPressed: () {},
+        tooltip: 'Camera',
         child: const Icon(Icons.add_a_photo_outlined),
       ), // This trailing comma makes auto-formatting nicer for build methods.
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colors.primaryContainer,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.access_time_outlined),
