@@ -115,8 +115,12 @@ class _MyHomePageState extends State<MyHomePage> {
           return Container(
             color: colors.secondaryContainer,
             height: 100,
-            child: Row(
-              children: [
+            child: InkWell(
+              onTap: () {
+                print("object");
+              },
+              child: Row(
+                children: [
                 Image(
                   image: NetworkImage(
                       "https://www.gstatic.com/webp/gallery/1.jpg"),
@@ -127,7 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colors.onSecondaryContainer),
                 ),
-              ],
+              ]
+              ),
             ),
           );
         },
@@ -155,6 +160,19 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+}
+
+class MyAllergiesPage extends StatelessWidget{
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+ 
+}
+
 
 ////////////////
 ///////////////////////////////////
