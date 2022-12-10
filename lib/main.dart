@@ -46,7 +46,6 @@ class _MyAppState extends State<MyApp> {
                 setState(() {
                   dark = !dark;
                 });
-                print("object");
               },
               icon: Icon(
                 Icons.dark_mode,
