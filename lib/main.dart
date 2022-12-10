@@ -611,13 +611,19 @@ class ProductScreen extends StatelessWidget {
                 ),
               ],
             ),
-            Container(
-              color: colors.secondaryContainer,
-              child: Text(
-                "blelejfksdfhlksjhflkhflskhjflkdsjh",
-                style: TextStyle(color: colors.onSecondaryContainer),
-              ),
-            )
+            Row(children: [
+              Flexible(
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
+                  color: colors.secondaryContainer,
+                  child: Text(
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra leo non tempus congue. Nam iaculis nunc et velit ornare, a imperdiet dui faucibus. Integer ac pharetra tellus, et imperdiet augue. Aenean sit amet velit orci. Aliquam vehicula leo vel lectus tincidunt vestibulum. Nullam enim justo, luctus ut molestie non, eleifend eget elit. Vivamus eros nulla, euismod et commodo tempus, ultricies ut urna. Suspendisse fermentum malesuada dui, vel ultricies quam. Vivamus sed finibus tellus. Phasellus sed mauris sed enim auctor sagittis. Ut molestie in nunc eget lacinia.",
+                    style: TextStyle(color: colors.onSecondaryContainer),
+                  ),
+                ),
+              )
+            ])
           ],
         ),
       ),
