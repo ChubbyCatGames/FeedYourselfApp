@@ -1,11 +1,10 @@
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
-import 'package:openfoodfacts/model/ProductResultV3.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:comida/page/notes_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'providers/theme.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
 import 'package:openfoodfacts/model/OcrIngredientsResult.dart';
@@ -26,42 +25,85 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+bool dark = false;
+
 class _MyAppState extends State<MyApp> {
-  bool dark = false;
+  final GoRouter _router = GoRouter(
+    initialLocation: '/recents',
+    routes: <RouteBase>[
+      ShellRoute(
+        builder: (BuildContext context, GoRouterState state, Widget child) {
+          return MyAppShell(
+            child: child,
+          );
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/recents',
+            pageBuilder: (context, state) {
+              return FadeTransitionPage(
+                child: const RecentsScreen(),
+                key: state.pageKey,
+              );
+            },
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'product/:productId',
+                builder: (BuildContext context, GoRouterState state) {
+                  return ProductScreen();
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/alergies',
+            pageBuilder: (context, state) {
+              return FadeTransitionPage(
+                child: const AlergiesScreen(),
+                key: state.pageKey,
+              );
+            },
+          ),
+        ],
+      ),
+    ],
+  );
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Feed Yourself',
+      routerConfig: _router,
       theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-      ),
+          useMaterial3: true,
+          colorScheme: lightColorScheme,
+          textTheme: GoogleFonts.poppinsTextTheme(),
+          pageTransitionsTheme: pageTransitionsTheme),
       darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: darkColorScheme,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-      ),
-      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-      home: Scaffold(
-          appBar: AppBar(title: Text("Feed Yourself"), actions: [
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  dark = !dark;
-                });
-              },
-              icon: Icon(
-                Icons.dark_mode,
-              ),
-            )
-          ]),
-          body: const MyHomePage(title: 'Feed Yourself')),
+          useMaterial3: true,
+          colorScheme: darkColorScheme,
+          textTheme: GoogleFonts.poppinsTextTheme(),
+          pageTransitionsTheme: pageTransitionsTheme),
+      themeMode: ThemeMode.system,
     );
   }
 }
+
+class MyTheme with ChangeNotifier {
+  static bool isDark = false;
+
+  ThemeMode currentTheme() {
+    return isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  void switchTheme() {
+    isDark != isDark;
+    notifyListeners();
+  }
+}
+
+MyTheme currentTheme = MyTheme();
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -100,6 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -108,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       backgroundColor: colors.background,
+
       body: ListView.separated(
         padding: const EdgeInsets.all(8),
         itemCount: entries.length,
@@ -155,6 +199,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Allergies',
           ),
         ],
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (int idx) => _onItemTapped(idx, context),
       ),
     );
   }
@@ -163,8 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class MyAllergiesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold();
   }
 }
 
@@ -181,7 +226,7 @@ Future<Product?> getProduct() async {
 
   ProductQueryConfiguration configuration = ProductQueryConfiguration(barcode,
       language: OpenFoodFactsLanguage.GERMAN, fields: [ProductField.ALL]);
-  ProductResultV3 result = await OpenFoodAPIClient.getProductV3(configuration);
+  ProductResult result = await OpenFoodAPIClient.getProduct(configuration);
 
   if (result.status == 1) {
     return result.product;
@@ -273,7 +318,7 @@ void saveAndExtractIngredient() async {
   }
 
   OcrIngredientsResult ocrResponse = await OpenFoodAPIClient.extractIngredients(
-      myUser, '3613042717385', OpenFoodFactsLanguage.SPANISH);
+      myUser, '3613042717385', OpenFoodFactsLanguage.FRENCH);
 
   if (ocrResponse.status != 0) {
     throw Exception("Text can't be extracted.");
@@ -323,7 +368,7 @@ class MusicAppDemo extends StatelessWidget {
     routes: <RouteBase>[
       ShellRoute(
         builder: (BuildContext context, GoRouterState state, Widget child) {
-          return MusicAppShell(
+          return MyAppShell(
             child: child,
           );
         },
@@ -340,9 +385,7 @@ class MusicAppDemo extends StatelessWidget {
               GoRoute(
                 path: 'product/:productId',
                 builder: (BuildContext context, GoRouterState state) {
-                  return ProductScreen(
-                    productId: state.params['productId'],
-                  );
+                  return ProductScreen();
                 },
               ),
             ],
@@ -376,32 +419,44 @@ class MusicAppDemo extends StatelessWidget {
   }
 }
 
-class MusicAppShell extends StatelessWidget {
+class MyAppShell extends StatelessWidget {
   final Widget child;
 
-  const MusicAppShell({
+  const MyAppShell({
     Key? key,
     required this.child,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
+      backgroundColor: colors.background,
       body: child,
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: colors.primaryContainer,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.my_library_music_rounded),
-            label: 'Recents',
+            icon: Icon(Icons.access_time_outlined),
+            label: 'Recent',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.timelapse),
-            label: 'Alergies',
+            icon: Icon(Icons.check_box_outlined),
+            label: 'Allergies',
           ),
         ],
         currentIndex: _calculateSelectedIndex(context),
         onTap: (int idx) => _onItemTapped(idx, context),
       ),
+      floatingActionButton: FloatingActionButton(onPressed: (() {
+        print(dark);
+        dark != dark;
+        print(dark);
+        MaterialApp(
+          themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+        );
+      })),
     );
   }
 
@@ -428,6 +483,28 @@ class MusicAppShell extends StatelessWidget {
   }
 }
 
+int _calculateSelectedIndex(BuildContext context) {
+  final GoRouter route = GoRouter.of(context);
+  final String location = route.location;
+  if (location.startsWith('/alergies')) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void _onItemTapped(int index, BuildContext context) {
+  switch (index) {
+    case 1:
+      GoRouter.of(context).go('/alergies');
+      break;
+    case 0:
+    default:
+      GoRouter.of(context).go('/recents');
+      break;
+  }
+}
+
 ///--------------------SCREENS--------------------
 
 class RecentsScreen extends StatelessWidget {
@@ -438,6 +515,7 @@ class RecentsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recents'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: ListView.builder(
         itemBuilder: (context, productId) {
@@ -479,54 +557,53 @@ class AlergiesScreen extends StatelessWidget {
 }
 
 class ProductScreen extends StatelessWidget {
-  final String? productId;
-
-  const ProductScreen({
-    required this.productId,
-    Key? key,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    final product = Producto(
-        '01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Product - ${product.name}'),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: 200,
-                  height: 200,
-                  child: Container(
-                    color: product.color,
-                    margin: const EdgeInsets.all(8),
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    // TODO: implement build
+    throw UnimplementedError();
   }
+}
+
+@override
+Widget build(BuildContext context) {
+  final product = Producto(
+      '01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Product - ${product.name}'),
+    ),
+    body: Center(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 200,
+                height: 200,
+                child: Container(
+                  color: product.color,
+                  margin: const EdgeInsets.all(8),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  Text(
+                    product.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 ///-------------------------------------
@@ -568,8 +645,12 @@ class ProductTile extends StatelessWidget {
           color: product.color,
         ),
       ),
-      title: Text(product.name),
-      subtitle: Text(product.brand),
+      title: Text(product.name,
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondaryContainer)),
+      subtitle: Text(product.brand,
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondaryContainer)),
       onTap: onTap,
     );
   }
