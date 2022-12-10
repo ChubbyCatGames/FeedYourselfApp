@@ -50,7 +50,9 @@ class _MyAppState extends State<MyApp> {
               GoRoute(
                 path: 'product/:productId',
                 builder: (BuildContext context, GoRouterState state) {
-                  return ProductScreen();
+                  return ProductScreen(
+                    productId: state.params['productId'],
+                  );
                 },
               ),
             ],
@@ -385,7 +387,9 @@ class MusicAppDemo extends StatelessWidget {
               GoRoute(
                 path: 'product/:productId',
                 builder: (BuildContext context, GoRouterState state) {
-                  return ProductScreen();
+                  return ProductScreen(
+                    productId: state.params['productId'],
+                  );
                 },
               ),
             ],
@@ -449,14 +453,6 @@ class MyAppShell extends StatelessWidget {
         currentIndex: _calculateSelectedIndex(context),
         onTap: (int idx) => _onItemTapped(idx, context),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: (() {
-        print(dark);
-        dark != dark;
-        print(dark);
-        MaterialApp(
-          themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-        );
-      })),
     );
   }
 
@@ -512,10 +508,11 @@ class RecentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recents'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colors.primaryContainer,
       ),
       body: ListView.builder(
         itemBuilder: (context, productId) {
@@ -529,17 +526,25 @@ class RecentsScreen extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: colors.tertiaryContainer,
+          onPressed: () {},
+          tooltip: 'Camera',
+          child: const Icon(Icons.add_a_photo_outlined)),
     );
   }
 }
 
+List<bool> isSelected = List<bool>.generate(10, (index) => false);
+
 class AlergiesScreen extends StatelessWidget {
   const AlergiesScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: colors.primaryContainer,
         title: const Text('Alergies'),
       ),
       body: ListView.builder(
@@ -557,10 +562,66 @@ class AlergiesScreen extends StatelessWidget {
 }
 
 class ProductScreen extends StatelessWidget {
+  final String? productId;
+
+  const ProductScreen({
+    required this.productId,
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    final colors = Theme.of(context).colorScheme;
+    final product = Producto(
+        '01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.primaryContainer,
+        title: Text(
+          'Product - ${product.name}',
+        ),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Container(
+                    color: product.color,
+                    margin: const EdgeInsets.all(8),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name,
+                        style:
+                            (TextStyle(color: colors.primary, fontSize: 30))),
+                    Text(
+                      product.name,
+                      style: (TextStyle(
+                        color: colors.primary,
+                      )),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              color: colors.secondaryContainer,
+              child: Text(
+                "blelejfksdfhlksjhflkhflskhjflkdsjh",
+                style: TextStyle(color: colors.onSecondaryContainer),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -637,6 +698,7 @@ class ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return ListTile(
       leading: SizedBox(
         width: 50,
@@ -645,12 +707,10 @@ class ProductTile extends StatelessWidget {
           color: product.color,
         ),
       ),
-      title: Text(product.name,
-          style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer)),
-      subtitle: Text(product.brand,
-          style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer)),
+      tileColor: colors.secondaryContainer,
+      textColor: colors.onSecondaryContainer,
+      title: Text(product.name),
+      subtitle: Text(product.brand),
       onTap: onTap,
     );
   }
@@ -665,6 +725,7 @@ class AllergyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return ListTile(
       leading: SizedBox(
         width: 50,
@@ -674,6 +735,9 @@ class AllergyTile extends StatelessWidget {
           margin: const EdgeInsets.all(8),
         ),
       ),
+      tileColor: colors.secondaryContainer,
+      textColor: colors.onSecondaryContainer,
+      selectedTileColor: colors.errorContainer,
       title: Text(allergy.name),
       onTap: onTap,
     );
