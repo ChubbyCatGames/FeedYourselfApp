@@ -545,7 +545,7 @@ class AlergiesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.primaryContainer,
-        title: const Text('Alergies'),
+        title: const Text('Allergies'),
       ),
       body: ListView.builder(
         itemBuilder: (context, index) {
