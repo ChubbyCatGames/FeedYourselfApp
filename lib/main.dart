@@ -1,5 +1,6 @@
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
+import 'package:openfoodfacts/model/ProductResultV3.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:comida/page/notes_page.dart';
@@ -14,6 +15,8 @@ import 'dart:math' as math;
 
 import 'package:go_router/go_router.dart';
 import 'package:english_words/english_words.dart';
+
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 void main() {
   runApp(const MyApp());
@@ -224,13 +227,18 @@ class MyAllergiesPage extends StatelessWidget {
 ///
 /// request a product from the OpenFoodFacts database
 Future<Product?> getProduct() async {
-  var barcode = '0048151623426';
+  var barcode = '8413164016961';
 
-  ProductQueryConfiguration configuration = ProductQueryConfiguration(barcode,
-      language: OpenFoodFactsLanguage.GERMAN, fields: [ProductField.ALL]);
-  ProductResult result = await OpenFoodAPIClient.getProduct(configuration);
+  final ProductQueryConfiguration configuration = ProductQueryConfiguration(
+    barcode,
+    language: OpenFoodFactsLanguage.GERMAN,
+    fields: [ProductField.ALL],
+    version: ProductQueryVersion.v3,
+  );
+  final ProductResultV3 result =
+      await OpenFoodAPIClient.getProductV3(configuration);
 
-  if (result.status == 1) {
+  if (result.status == ProductResultV3.statusSuccess) {
     return result.product;
   } else {
     throw Exception('product not found, please insert data for $barcode');
@@ -344,8 +352,8 @@ void saveAndExtractIngredient() async {
       fields: [
         ProductField.INGREDIENTS_TEXT,
       ]);
-  ProductResult productResult =
-      await OpenFoodAPIClient.getProduct(configurations, user: myUser);
+  ProductResultV3 productResult =
+      await OpenFoodAPIClient.getProductV3(configurations, user: myUser);
 
   if (productResult.status != 1) {
     throw Exception('product not found, please insert data for 3613042717385');
@@ -528,10 +536,27 @@ class RecentsScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
           backgroundColor: colors.tertiaryContainer,
-          onPressed: () {},
+          onPressed: () {
+            startCamera();
+          },
           tooltip: 'Camera',
           child: const Icon(Icons.add_a_photo_outlined)),
     );
+  }
+}
+
+void startCamera() async {
+  var result = await BarcodeScanner.scan();
+
+  print(result.type); // The result type (barcode, cancelled, failed)
+  print(result.rawContent); // The barcode content
+  print(result.format); // The barcode format (as enum)
+  String code = result.rawContent;
+
+  if (result.format == 'qr') {
+    print("esto es un qr");
+  } else {
+    getProduct();
   }
 }
 
