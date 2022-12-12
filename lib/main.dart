@@ -44,7 +44,14 @@ var scanIngredients = "";
 var scanAllergens = "";
 var db;
 
+List<Producto> arr = [];
+var numberProduct=0;
+
+List<Allergy> all = [];
+var numberAllergy=0;
+
 class _MyAppState extends State<MyApp> {
+
   final GoRouter _router = GoRouter(
     initialLocation: '/recents',
     routes: <RouteBase>[
@@ -91,6 +98,36 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+  all[numberAllergy]= new Allergy('Gluten', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Huevos', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Crustáceos', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Mostaza', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Lácteos', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Moluscos', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Pescado', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Frutos secos', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Cacahuetes', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Apio', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Sésamo', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Soja', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Altramuces', true);
+  numberAllergy++;
+  all[numberAllergy]= new Allergy('Sulfitos', true);
+  numberAllergy++;
+
     return MaterialApp.router(
       title: 'Feed Yourself',
       routerConfig: _router,
@@ -221,8 +258,7 @@ class RecentsScreen extends StatelessWidget {
       body: ListView.builder(
         itemCount: 4,
         itemBuilder: (context, productId) {
-          final product = Producto(name, ingredients, allergies,
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+          final product = arr[productId];
           return ProductTile(
             product: product,
             onTap: () {
@@ -272,11 +308,10 @@ class AlergiesScreen extends StatelessWidget {
       ),
       body: ListView.builder(
         itemBuilder: (context, index) {
-          final allergy =
-              Allergy('01011233F', 'TestProduct', Color.fromARGB(255, 0, 0, 0));
+          final allergy = all[index];
           return AllergyTile(
             allergy: allergy,
-            onTap: () {},
+            onTap: () {allergy.can= !allergy.can;},
           );
         },
       ),
@@ -296,8 +331,7 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final product = Producto('01011233F', 'TestProduct', 'Hacendado',
-        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+    final product = Producto('01011233F', 'TestProduct');
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
@@ -316,7 +350,7 @@ class ProductScreen extends StatelessWidget {
                   height: 200,
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    child: Image.network(product.rutaImagen),
+                    //child: Image.network(product.rutaImagen),
                   ),
                 ),
                 Column(
@@ -348,7 +382,7 @@ class ProductScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   color: colors.secondaryContainer,
                   child: Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra leo non tempus congue. Nam iaculis nunc et velit ornare, a imperdiet dui faucibus. Integer ac pharetra tellus, et imperdiet augue. Aenean sit amet velit orci. Aliquam vehicula leo vel lectus tincidunt vestibulum. Nullam enim justo, luctus ut molestie non, eleifend eget elit. Vivamus eros nulla, euismod et commodo tempus, ultricies ut urna. Suspendisse fermentum malesuada dui, vel ultricies quam. Vivamus sed finibus tellus. Phasellus sed mauris sed enim auctor sagittis. Ut molestie in nunc eget lacinia.",
+                    product.ingredients,
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
@@ -377,8 +411,7 @@ class ProductScreenCamera extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final product = Producto('0', productName as String, 'Hacendado',
-        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+    final product = Producto('0', productName as String);
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
@@ -397,7 +430,7 @@ class ProductScreenCamera extends StatelessWidget {
                   height: 200,
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    child: Image.network(product.rutaImagen),
+                    //child: Image.network(product.rutaImagen),
                   ),
                 ),
                 Column(
@@ -446,23 +479,22 @@ class ProductScreenCamera extends StatelessWidget {
 
 ///-------------------TILES----------------
 class Producto {
-  final String id;
   final String name;
-  final String brand;
-  final String rutaImagen;
+  final String ingredients;
+  //final String brand;
+  //final String rutaImagen;
 
-  Producto(this.id, this.name, this.brand, this.rutaImagen);
+  Producto(this.name, this.ingredients);
 }
 
 class Allergy {
-  final String id;
   final String name;
-  final Color color;
+  bool can; 
   bool isSelected = false;
 
-  Allergy(this.id, this.name, this.color);
+  Allergy(this.name, this.can);
 
-  String get fullId => '$name-$id';
+  //String get fullId => '$name-$id';
 }
 
 class ProductTile extends StatelessWidget {
@@ -487,7 +519,7 @@ class ProductTile extends StatelessWidget {
       tileColor: colors.secondaryContainer,
       textColor: colors.onSecondaryContainer,
       title: Text(product.name),
-      subtitle: Text(product.brand),
+      //subtitle: Text(product.brand),
       onTap: onTap,
     );
   }
@@ -508,14 +540,14 @@ class AllergyTile extends StatelessWidget {
         width: 50,
         height: 50,
         child: Container(
-          color: allergy.color,
+          //color: allergy.color,
           margin: const EdgeInsets.all(8),
         ),
       ),
       tileColor: colors.secondaryContainer,
       textColor: colors.onSecondaryContainer,
       selectedTileColor: colors.errorContainer,
-      title: Text(allergy.name),
+      title: Text(allergy.name + " " + (allergy.can? "puede": "no puede")),
       onTap: onTap,
     );
   }
@@ -549,11 +581,23 @@ Future<Product?> getProduct(String barcode) async {
     if (result.product?.allergens != null) {
       scanAllergens = "none";
     }
-    ProductScreenCamera(
-      productName: scanName,
-      productIngredients: scanIngredients,
-      allergies: scanAllergens,
-    );
+    
+    var can=true;
+
+    for(var i=0; i<14; i++){
+      if(!all[i].can){
+        if(scanIngredients.contains(all[i].name)){
+          scanIngredients= "No puede tomarlo";
+          break;
+        }
+      }
+    }
+
+    final product = Producto(scanName, scanIngredients);
+    
+    arr[numberProduct] = product;
+    numberProduct++;
+
     return result.product;
   } else {
     throw Exception('product not found, please insert data for $barcode');
