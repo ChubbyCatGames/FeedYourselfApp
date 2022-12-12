@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:openfoodfacts/model/ProductResultV3.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
-import 'package:comida/page/notes_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/theme.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
@@ -205,7 +204,7 @@ void startCamera() async {
   if (result.format == 'qr') {
     print("esto es un qr");
   } else {
-    getProduct();
+    getProduct(code);
   }
 }
 
@@ -400,9 +399,7 @@ class AllergyTile extends StatelessWidget {
 ///////////
 ///
 /// request a product from the OpenFoodFacts database
-Future<Product?> getProduct() async {
-  var barcode = '8413164016961';
-
+Future<Product?> getProduct(String barcode) async {
   final ProductQueryConfiguration configuration = ProductQueryConfiguration(
     barcode,
     language: OpenFoodFactsLanguage.GERMAN,
