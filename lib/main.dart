@@ -115,7 +115,7 @@ class _MyAppState extends State<MyApp> {
   numberAllergy++;
   all[numberAllergy]= new Allergy('Frutos secos', true);
   numberAllergy++;
-  all[numberAllergy]= new Allergy('Cacahuetes', true);
+  all[numberAllergy]= new Allergy('Cacahuete', true);
   numberAllergy++;
   all[numberAllergy]= new Allergy('Apio', true);
   numberAllergy++;
