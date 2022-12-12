@@ -1,6 +1,9 @@
+import 'dart:isolate';
+
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
 import 'package:openfoodfacts/model/ProductResultV3.dart';
+import 'package:sembast/sembast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +19,10 @@ import 'package:go_router/go_router.dart';
 import 'package:english_words/english_words.dart';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
+
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sembast/sembast_io.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,6 +41,7 @@ class MyApp extends StatefulWidget {
 ///
 var scanName = "";
 var scanIngredients = "";
+var scanAllergens = "";
 var db;
 
 class _MyAppState extends State<MyApp> {
@@ -51,7 +59,7 @@ class _MyAppState extends State<MyApp> {
             path: '/recents',
             pageBuilder: (context, state) {
               return FadeTransitionPage(
-                child: const RecentsScreen(),
+                child: RecentsScreen(),
                 key: state.pageKey,
               );
             },
@@ -166,11 +174,39 @@ class MyAppShell extends StatelessWidget {
 ///
 ///-----------------RECENT------------------------------
 class RecentsScreen extends StatelessWidget {
-  const RecentsScreen({Key? key}) : super(key: key);
-
+  var name = "";
+  var ingredients = "";
+  var allergies = "";
+  var store = intMapStoreFactory.store();
+  RecentsScreen({Key? key}) : super(key: key);
   SetupDatabase() async {
-    db = await openDatabase('productos.db');
-    print(db);
+    // get the application documents directory
+    var dir = await getApplicationDocumentsDirectory();
+// make sure it exists
+    await dir.create(recursive: true);
+// build the database path
+    var dbPath = join(dir.path, 'productos.db');
+// open the database
+    db = await databaseFactoryIo.openDatabase(dbPath);
+
+    //var store = StoreRef.main();
+    var key = await store.add(db, {
+      'Pipa': {'Ingredients': 'Muchos', 'Allergies': 'Allergies'}
+    });
+
+    var record = await store.record(key).getSnapshot(db);
+    name = "Pipa";
+    ingredients = record!['Pipa.Ingredients'] as String;
+    allergies = record!['Pipa.Allergies'] as String;
+
+    // await store.record('Name').put(db, 'Pipa');
+    // await store.record('Ingredients').put(db, "Muchos");
+    // await store.record('Allergies').put(db, "none");
+
+    // name = await store.record('Name').get(db) as String;
+    // ingredients = await store.record('Ingredients').get(db) as String;
+    // allergies = await store.record('Allergies').get(db) as String;
+    print(name + ingredients + allergies);
   }
 
   @override
@@ -183,8 +219,9 @@ class RecentsScreen extends StatelessWidget {
         backgroundColor: colors.primaryContainer,
       ),
       body: ListView.builder(
+        itemCount: 4,
         itemBuilder: (context, productId) {
-          final product = Producto('01011233F', 'TestProduct', 'Hacendado',
+          final product = Producto(name, ingredients, allergies,
               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
           return ProductTile(
             product: product,
@@ -324,6 +361,87 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
+///-----------------------PRODUCT SCREEN CAMERA
+class ProductScreenCamera extends StatelessWidget {
+  final String? productName;
+  final String? productIngredients;
+  final String? allergies;
+
+  const ProductScreenCamera({
+    required this.productName,
+    required this.productIngredients,
+    required this.allergies,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final product = Producto('0', productName as String, 'Hacendado',
+        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.primaryContainer,
+        title: Text(
+          'Product - ${product.name}',
+        ),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    child: Image.network(product.rutaImagen),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(product.name,
+                          style:
+                              (TextStyle(color: colors.primary, fontSize: 20))),
+                    ),
+                    FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        product.name,
+                        style: (TextStyle(
+                          color: colors.primary,
+                        )),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Row(children: [
+              Flexible(
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
+                  color: colors.secondaryContainer,
+                  child: Text(
+                    productIngredients as String,
+                    style: TextStyle(color: colors.onSecondaryContainer),
+                  ),
+                ),
+              )
+            ])
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 ///-------------------------------------
 
 ///-------------------TILES----------------
@@ -428,6 +546,14 @@ Future<Product?> getProduct(String barcode) async {
     if (result.product?.ingredients != null) {
       scanIngredients = result.product?.ingredients as String;
     }
+    if (result.product?.allergens != null) {
+      scanAllergens = "none";
+    }
+    ProductScreenCamera(
+      productName: scanName,
+      productIngredients: scanIngredients,
+      allergies: scanAllergens,
+    );
     return result.product;
   } else {
     throw Exception('product not found, please insert data for $barcode');
