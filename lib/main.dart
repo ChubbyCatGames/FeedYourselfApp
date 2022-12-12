@@ -26,9 +26,15 @@ class MyApp extends StatefulWidget {
 
   State<MyApp> createState() => _MyAppState();
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////TEMA//////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
+////GLOBALES
+///
+var scanName = "";
+var scanIngredients = "";
+var db;
 
 class _MyAppState extends State<MyApp> {
   final GoRouter _router = GoRouter(
@@ -162,9 +168,15 @@ class MyAppShell extends StatelessWidget {
 class RecentsScreen extends StatelessWidget {
   const RecentsScreen({Key? key}) : super(key: key);
 
+  SetupDatabase() async {
+    db = await openDatabase('productos.db');
+    print(db);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    SetupDatabase();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recents'),
@@ -204,7 +216,7 @@ void startCamera() async {
   if (result.format == 'qr') {
     print("esto es un qr");
   } else {
-    getProduct(code);
+    Future<Product?> product = getProduct(code);
   }
 }
 
@@ -402,7 +414,7 @@ class AllergyTile extends StatelessWidget {
 Future<Product?> getProduct(String barcode) async {
   final ProductQueryConfiguration configuration = ProductQueryConfiguration(
     barcode,
-    language: OpenFoodFactsLanguage.GERMAN,
+    language: OpenFoodFactsLanguage.SPANISH,
     fields: [ProductField.ALL],
     version: ProductQueryVersion.v3,
   );
@@ -410,6 +422,12 @@ Future<Product?> getProduct(String barcode) async {
       await OpenFoodAPIClient.getProductV3(configuration);
 
   if (result.status == ProductResultV3.statusSuccess) {
+    if (result.product?.productName != null) {
+      scanName = result.product?.productName as String;
+    }
+    if (result.product?.ingredients != null) {
+      scanIngredients = result.product?.ingredients as String;
+    }
     return result.product;
   } else {
     throw Exception('product not found, please insert data for $barcode');
