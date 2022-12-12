@@ -174,7 +174,7 @@ class RecentsScreen extends StatelessWidget {
       body: ListView.builder(
         itemBuilder: (context, productId) {
           final product = Producto('01011233F', 'TestProduct', 'Hacendado',
-              Color.fromARGB(255, 0, 0, 0));
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
           return ProductTile(
             product: product,
             onTap: () {
@@ -248,8 +248,8 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final product = Producto(
-        '01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
+    final product = Producto('01011233F', 'TestProduct', 'Hacendado',
+        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
@@ -267,21 +267,27 @@ class ProductScreen extends StatelessWidget {
                   width: 200,
                   height: 200,
                   child: Container(
-                    color: product.color,
                     margin: const EdgeInsets.all(8),
+                    child: Image.network(product.rutaImagen),
                   ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.name,
-                        style:
-                            (TextStyle(color: colors.primary, fontSize: 30))),
-                    Text(
-                      product.name,
-                      style: (TextStyle(
-                        color: colors.primary,
-                      )),
+                    FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(product.name,
+                          style:
+                              (TextStyle(color: colors.primary, fontSize: 20))),
+                    ),
+                    FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        product.name,
+                        style: (TextStyle(
+                          color: colors.primary,
+                        )),
+                      ),
                     ),
                   ],
                 ),
@@ -307,48 +313,6 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
-@override
-Widget build(BuildContext context) {
-  final product = Producto(
-      '01011233F', 'TestProduct', 'Hacendado', Color.fromARGB(255, 0, 0, 0));
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Product - ${product.name}'),
-    ),
-    body: Center(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 200,
-                height: 200,
-                child: Container(
-                  color: product.color,
-                  margin: const EdgeInsets.all(8),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  Text(
-                    product.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 ///-------------------------------------
 
 ///-------------------TILES----------------
@@ -356,15 +320,16 @@ class Producto {
   final String id;
   final String name;
   final String brand;
-  final Color color;
+  final String rutaImagen;
 
-  Producto(this.id, this.name, this.brand, this.color);
+  Producto(this.id, this.name, this.brand, this.rutaImagen);
 }
 
 class Allergy {
   final String id;
   final String name;
   final Color color;
+  bool isSelected = false;
 
   Allergy(this.id, this.name, this.color);
 
@@ -386,7 +351,8 @@ class ProductTile extends StatelessWidget {
         width: 50,
         height: 50,
         child: Container(
-          color: product.color,
+          child: Image.network(
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
         ),
       ),
       tileColor: colors.secondaryContainer,
