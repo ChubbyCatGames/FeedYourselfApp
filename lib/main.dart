@@ -26,7 +26,6 @@ import 'package:sembast/sembast_io.dart';
 
 import 'package:objectbox/objectbox.dart';
 import 'productObject.dart';
-import 'package:objectbox/internal.dart';
 
 void main() async {
   runApp(const MyApp());

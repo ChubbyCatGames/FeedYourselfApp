@@ -7,6 +7,5 @@ class productObject {
 
   String? name;
 
-  @Property(type: PropertyType.date)
-  DateTime? date;
+  String? ingredients;
 }
