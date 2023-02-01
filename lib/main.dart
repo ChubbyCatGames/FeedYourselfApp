@@ -27,7 +27,16 @@ import 'package:sembast/sembast_io.dart';
 import 'package:objectbox/objectbox.dart';
 import 'productObject.dart';
 
+import 'objectbox.dart';
+
+late ObjectBox objectBox;
+
+
 void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  objectBox = await ObjectBox.create();
+
   runApp(const MyApp());
 }
 
