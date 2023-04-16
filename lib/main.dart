@@ -2,16 +2,12 @@ import 'dart:isolate';
 
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
-import 'package:openfoodfacts/model/ProductResultV3.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/theme.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
-
-import 'package:openfoodfacts/model/OcrIngredientsResult.dart';
-import 'package:openfoodfacts/utils/TagType.dart';
 
 import 'dart:math' as math;
 
@@ -31,9 +27,7 @@ import 'objectbox.dart';
 
 late ObjectBox objectBox;
 
-
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   objectBox = await ObjectBox.create();
 
