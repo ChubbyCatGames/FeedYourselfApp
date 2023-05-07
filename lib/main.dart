@@ -46,8 +46,8 @@ class MyApp extends StatefulWidget {
 ////GLOBALES
 ///
 var scanName = "";
-var scanIngredients = "";
-var scanAllergens = "";
+List<Ingredient> scanIngredients = [];
+Allergens? scanAllergens;
 var db;
 
 class _MyAppState extends State<MyApp> {
@@ -370,8 +370,8 @@ class ProductScreen extends StatelessWidget {
 ///-----------------------PRODUCT SCREEN CAMERA
 class ProductScreenCamera extends StatelessWidget {
   final String? productName;
-  final String? productIngredients;
-  final String? allergies;
+  final List<Ingredient>? productIngredients;
+  final Allergens? allergies;
 
   const ProductScreenCamera({
     required this.productName,
@@ -550,16 +550,25 @@ Future<Product?> getProduct(String barcode) async {
       scanName = result.product?.productName as String;
     }
     if (result.product?.ingredients != null) {
-      scanIngredients = result.product?.ingredients as String;
+      scanIngredients = result.product?.ingredients as List<Ingredient>;
+      if (scanIngredients.isEmpty) {
+        print(
+            "_____________________________________________________________________________________");
+        scanIngredients.add(Ingredient(text: await extractIngredient(barcode)));
+      }
     }
     if (result.product?.allergens != null) {
-      scanAllergens = "none";
+      scanAllergens = result.product?.allergens as Allergens?;
     }
     ProductScreenCamera(
       productName: scanName,
       productIngredients: scanIngredients,
       allergies: scanAllergens,
     );
+    print("hola");
+    print(scanName.toString());
+    print(scanIngredients.toString());
+    print(scanAllergens?.names.toString());
     return result.product;
   } else {
     throw Exception('product not found, please insert data for $barcode');
@@ -613,13 +622,13 @@ void addProductImage() async {
 /// Extract the ingredients of an existing product of the OpenFoodFacts database
 /// That has already ingredient image
 /// Otherwise it should be added first to the server and then this can be called
-Future<String?> extractIngredient() async {
+Future<String?> extractIngredient(String barcode) async {
   // a registered user login for https://world.openfoodfacts.org/ is required
   User myUser = User(userId: 'max@off.com', password: 'password');
 
   // query the OpenFoodFacts API
   OcrIngredientsResult response = await OpenFoodAPIClient.extractIngredients(
-      myUser, '0041220576920', OpenFoodFactsLanguage.ENGLISH);
+      myUser, barcode, OpenFoodFactsLanguage.SPANISH);
 
   if (response.status != 0) {
     throw Exception("Text can't be extracted.");
@@ -667,13 +676,14 @@ void saveAndExtractIngredient() async {
   }
 
   //Get The saved product's ingredients from the server
-  ProductQueryConfiguration configurations = ProductQueryConfiguration(
+  final ProductQueryConfiguration configurations = ProductQueryConfiguration(
       '3613042717385',
+      version: ProductQueryVersion.v3,
       language: OpenFoodFactsLanguage.FRENCH,
       fields: [
         ProductField.INGREDIENTS_TEXT,
       ]);
-  ProductResultV3 productResult =
+  final ProductResultV3 productResult =
       await OpenFoodAPIClient.getProductV3(configurations, user: myUser);
 
   if (productResult.status != 1) {
