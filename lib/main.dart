@@ -271,23 +271,59 @@ class AlergiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final List<Allergy> allergiesList = CreateAllergies();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.primaryContainer,
         title: const Text('Allergies'),
       ),
       body: ListView.builder(
+        itemCount: allergiesList.length,
         itemBuilder: (context, index) {
-          final allergy =
-              Allergy('01011233F', 'TestProduct', Color.fromARGB(255, 0, 0, 0));
+          final allergy = allergiesList[index];
           return AllergyTile(
-            allergy: allergy,
+            allergy: allergy.name,
+            imagePath: allergy.imagePath,
             onTap: () {},
           );
         },
       ),
     );
   }
+}
+
+List<Allergy> CreateAllergies(){
+  List<Allergy> allergies = [];
+  Allergy lupine = Allergy('a1','Lupine', 'lib/assets/altramuces.png');
+  allergies.add(lupine);
+  Allergy celery = Allergy('a2','Celery', 'lib/assets/Apio.png');
+  allergies.add(celery);
+  Allergy peanuts = Allergy('a3','Peanuts', 'lib/assets/cacahuetes.png');
+  allergies.add(peanuts);
+  Allergy crustaceans = Allergy('a4','Crustaceans', 'lib/assets/Crustáceos.png');
+  allergies.add(crustaceans);
+  Allergy gluten = Allergy('a5','Gluten', 'lib/assets/Gluten.png');
+  allergies.add(gluten);
+  Allergy eggs = Allergy('a6','Eggs', 'lib/assets/huevos.png');
+  allergies.add(eggs);
+  Allergy dairy = Allergy('a7','Dairy', 'lib/assets/leche.png');
+  allergies.add(dairy);
+  Allergy mollusks = Allergy('a8','Mollusks', 'lib/assets/moluscos.png');
+  allergies.add(mollusks);
+  Allergy mustard = Allergy('a9','Mustard', 'lib/assets/Mostaza.png');
+  allergies.add(mustard);
+  Allergy nuts = Allergy('a10','Nuts', 'lib/assets/nueces.png');
+  allergies.add(nuts);
+  Allergy fish = Allergy('a11','Fish', 'lib/assets/pescado.png');
+  allergies.add(fish);
+  Allergy sesame = Allergy('a12','Sesame', 'lib/assets/Sésamo.png');
+  allergies.add(sesame);
+  Allergy soy = Allergy('a13','Soy', 'lib/assets/Soja.png');
+  allergies.add(soy);
+  Allergy sulphites = Allergy('a14','Sulphites', 'lib/assets/Sulfitos.png');
+  allergies.add(sulphites);
+
+  return allergies;
 }
 
 //-----------------------------------------------PRODUCT--------------------------------------------------------------
@@ -463,10 +499,10 @@ class Producto {
 class Allergy {
   final String id;
   final String name;
-  final Color color;
+  final String imagePath;
   bool isSelected = false;
 
-  Allergy(this.id, this.name, this.color);
+  Allergy(this.id, this.name, this.imagePath);
 
   String get fullId => '$name-$id';
 }
@@ -500,10 +536,11 @@ class ProductTile extends StatelessWidget {
 }
 
 class AllergyTile extends StatelessWidget {
-  final Allergy allergy;
+  final String allergy;
+  final String imagePath;
   final VoidCallback? onTap;
 
-  const AllergyTile({Key? key, required this.allergy, this.onTap})
+  const AllergyTile({Key? key, required this.allergy, required this.imagePath, this.onTap})
       : super(key: key);
 
   @override
@@ -514,14 +551,16 @@ class AllergyTile extends StatelessWidget {
         width: 50,
         height: 50,
         child: Container(
-          color: allergy.color,
+          // ignore: sort_child_properties_last
+          child: Image.asset(imagePath),
+          //color: allergy.image,
           margin: const EdgeInsets.all(8),
         ),
       ),
       tileColor: colors.secondaryContainer,
       textColor: colors.onSecondaryContainer,
       selectedTileColor: colors.errorContainer,
-      title: Text(allergy.name),
+      title: Text(allergy),
       onTap: onTap,
     );
   }

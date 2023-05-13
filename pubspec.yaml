@@ -78,7 +78,21 @@ flutter_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - lib/assets/altramuces.png
+    - lib/assets/Apio.png
+    - lib/assets/cacahuetes.png
+    - lib/assets/Crustáceos.png
+    - lib/assets/Gluten.png
+    - lib/assets/huevos.png
+    - lib/assets/leche.png
+    - lib/assets/moluscos.png
+    - lib/assets/Mostaza.png
+    - lib/assets/nueces.png
+    - lib/assets/pescado.png
+    - lib/assets/Sésamo.png
+    - lib/assets/Soja.png
+    - lib/assets/Sulfitos.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
