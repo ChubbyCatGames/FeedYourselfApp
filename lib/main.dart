@@ -50,6 +50,9 @@ List<Ingredient> scanIngredients = [];
 Allergens? scanAllergens;
 var db;
 
+// Allergies list.
+List<Allergy> allergiesList = CreateAllergies();
+
 class _MyAppState extends State<MyApp> {
   final GoRouter _router = GoRouter(
     initialLocation: '/recents',
@@ -266,12 +269,15 @@ void startCamera() async {
 //----------------------------ALLERGIES----------------------------------------
 List<bool> isSelected = List<bool>.generate(10, (index) => false);
 
-class AlergiesScreen extends StatelessWidget {
+class AlergiesScreen extends StatefulWidget {
   const AlergiesScreen({Key? key}) : super(key: key);
+  AlergiesScreenState createState()=> AlergiesScreenState();
+}
+
+class AlergiesScreenState extends State<AlergiesScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final List<Allergy> allergiesList = CreateAllergies();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.primaryContainer,
@@ -280,11 +286,24 @@ class AlergiesScreen extends StatelessWidget {
       body: ListView.builder(
         itemCount: allergiesList.length,
         itemBuilder: (context, index) {
-          final allergy = allergiesList[index];
+          // Checkbox.
+          Color getColor(Set<MaterialState> states) {
+            const Set<MaterialState> interactiveStates = <MaterialState>{
+              MaterialState.pressed,
+              MaterialState.hovered,
+              MaterialState.focused,
+            };
+            if (states.any(interactiveStates.contains)) {
+              return Colors.blue;
+            }
+            return Colors.red;
+          }
           return AllergyTile(
-            allergy: allergy.name,
-            imagePath: allergy.imagePath,
-            onTap: () {},
+            allergy: allergiesList[index],
+            imagePath: allergiesList[index].imagePath,
+            onTap: (){
+              allergiesList[index].ChangeBool();
+            }
           );
         },
       ),
@@ -294,33 +313,33 @@ class AlergiesScreen extends StatelessWidget {
 
 List<Allergy> CreateAllergies(){
   List<Allergy> allergies = [];
-  Allergy lupine = Allergy('a1','Lupine', 'lib/assets/altramuces.png');
+  Allergy lupine = Allergy(0,'Lupine', 'lib/assets/altramuces.png');
   allergies.add(lupine);
-  Allergy celery = Allergy('a2','Celery', 'lib/assets/Apio.png');
+  Allergy celery = Allergy(1,'Celery', 'lib/assets/Apio.png');
   allergies.add(celery);
-  Allergy peanuts = Allergy('a3','Peanuts', 'lib/assets/cacahuetes.png');
+  Allergy peanuts = Allergy(2,'Peanuts', 'lib/assets/cacahuetes.png');
   allergies.add(peanuts);
-  Allergy crustaceans = Allergy('a4','Crustaceans', 'lib/assets/Crustáceos.png');
+  Allergy crustaceans = Allergy(3,'Crustaceans', 'lib/assets/Crustáceos.png');
   allergies.add(crustaceans);
-  Allergy gluten = Allergy('a5','Gluten', 'lib/assets/Gluten.png');
+  Allergy gluten = Allergy(4,'Gluten', 'lib/assets/Gluten.png');
   allergies.add(gluten);
-  Allergy eggs = Allergy('a6','Eggs', 'lib/assets/huevos.png');
+  Allergy eggs = Allergy(5,'Eggs', 'lib/assets/huevos.png');
   allergies.add(eggs);
-  Allergy dairy = Allergy('a7','Dairy', 'lib/assets/leche.png');
+  Allergy dairy = Allergy(6,'Dairy', 'lib/assets/leche.png');
   allergies.add(dairy);
-  Allergy mollusks = Allergy('a8','Mollusks', 'lib/assets/moluscos.png');
+  Allergy mollusks = Allergy(7,'Mollusks', 'lib/assets/moluscos.png');
   allergies.add(mollusks);
-  Allergy mustard = Allergy('a9','Mustard', 'lib/assets/Mostaza.png');
+  Allergy mustard = Allergy(8,'Mustard', 'lib/assets/Mostaza.png');
   allergies.add(mustard);
-  Allergy nuts = Allergy('a10','Nuts', 'lib/assets/nueces.png');
+  Allergy nuts = Allergy(9,'Nuts', 'lib/assets/nueces.png');
   allergies.add(nuts);
-  Allergy fish = Allergy('a11','Fish', 'lib/assets/pescado.png');
+  Allergy fish = Allergy(10,'Fish', 'lib/assets/pescado.png');
   allergies.add(fish);
-  Allergy sesame = Allergy('a12','Sesame', 'lib/assets/Sésamo.png');
+  Allergy sesame = Allergy(11,'Sesame', 'lib/assets/Sésamo.png');
   allergies.add(sesame);
-  Allergy soy = Allergy('a13','Soy', 'lib/assets/Soja.png');
+  Allergy soy = Allergy(12,'Soy', 'lib/assets/Soja.png');
   allergies.add(soy);
-  Allergy sulphites = Allergy('a14','Sulphites', 'lib/assets/Sulfitos.png');
+  Allergy sulphites = Allergy(13,'Sulphites', 'lib/assets/Sulfitos.png');
   allergies.add(sulphites);
 
   return allergies;
@@ -497,14 +516,20 @@ class Producto {
 }
 
 class Allergy {
-  final String id;
+  final int id;
   final String name;
   final String imagePath;
-  bool isSelected = false;
+  bool? isSelected;
 
-  Allergy(this.id, this.name, this.imagePath);
+  Allergy(this.id, this.name, this.imagePath){
+    this.isSelected = false;
+  }
 
   String get fullId => '$name-$id';
+
+  void ChangeBool(){
+    isSelected = !isSelected!; 
+  }
 }
 
 class ProductTile extends StatelessWidget {
@@ -535,24 +560,40 @@ class ProductTile extends StatelessWidget {
   }
 }
 
-class AllergyTile extends StatelessWidget {
-  final String allergy;
+class AllergyTile extends StatefulWidget {
+  final Allergy allergy;
   final String imagePath;
   final VoidCallback? onTap;
 
   const AllergyTile({Key? key, required this.allergy, required this.imagePath, this.onTap})
       : super(key: key);
 
+  AllergyTileState createState() => AllergyTileState();
+}
+
+class AllergyTileState extends State<AllergyTile>{
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final Checkbox cb = Checkbox(
+      value: allergiesList[widget.allergy.id].isSelected, 
+      onChanged: (bool? value) {
+          setState(() {
+            allergiesList[widget.allergy.id].isSelected = value!;
+          });
+      },);
     return ListTile(
       leading: SizedBox(
-        width: 50,
+        width: 100,
         height: 50,
         child: Container(
           // ignore: sort_child_properties_last
-          child: Image.asset(imagePath),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children:[
+              cb,
+              Image.asset(widget.imagePath),
+            ]),
           //color: allergy.image,
           margin: const EdgeInsets.all(8),
         ),
@@ -560,8 +601,12 @@ class AllergyTile extends StatelessWidget {
       tileColor: colors.secondaryContainer,
       textColor: colors.onSecondaryContainer,
       selectedTileColor: colors.errorContainer,
-      title: Text(allergy),
-      onTap: onTap,
+      title: Text(widget.allergy.name),
+      onTap: (){
+        //allergiesList[widget.allergy.id].ChangeBool();
+        //print(allergiesList[widget.allergy.id].isSelected.toString());
+        widget.onTap!();
+        }
     );
   }
 }
