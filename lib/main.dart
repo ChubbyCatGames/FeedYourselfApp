@@ -281,7 +281,7 @@ class AlergiesScreenState extends State<AlergiesScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.primaryContainer,
-        title: const Text('Allergies'),
+        title: const Text('Selected allergies'),
       ),
       body: ListView.builder(
         itemCount: allergiesList.length,
@@ -575,11 +575,24 @@ class AllergyTileState extends State<AllergyTile>{
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    Color getColor(Set<MaterialState> states) {
+      const Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return colors.primaryContainer;
+      }
+      return colors.secondaryContainer;
+    }
     final Checkbox cb = Checkbox(
-      value: allergiesList[widget.allergy.id].isSelected, 
+      checkColor: colors.primaryContainer,
+      fillColor: MaterialStateProperty.resolveWith(getColor),
+      value: widget.allergy.isSelected, 
       onChanged: (bool? value) {
           setState(() {
-            allergiesList[widget.allergy.id].isSelected = value!;
+            widget.allergy.isSelected = value!;
           });
       },);
     return ListTile(
@@ -605,7 +618,8 @@ class AllergyTileState extends State<AllergyTile>{
       onTap: (){
         //allergiesList[widget.allergy.id].ChangeBool();
         //print(allergiesList[widget.allergy.id].isSelected.toString());
-        widget.onTap!();
+        widget.allergy.isSelected = !widget.allergy.isSelected!;
+        cb.onChanged!(widget.allergy.isSelected);
         }
     );
   }
