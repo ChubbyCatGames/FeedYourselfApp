@@ -29,7 +29,7 @@
     },
     {
       "id": "2:6467918117710655503",
-      "lastPropertyId": "2:3196279535286405156",
+      "lastPropertyId": "3:7303221391444807547",
       "name": "AllergensData",
       "properties": [
         {
@@ -42,6 +42,11 @@
           "id": "2:3196279535286405156",
           "name": "isChecked",
           "type": 1
+        },
+        {
+          "id": "3:7303221391444807547",
+          "name": "name",
+          "type": 9
         }
       ],
       "relations": []

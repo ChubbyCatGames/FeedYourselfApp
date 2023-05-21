@@ -352,8 +352,9 @@ List<Allergy> CreateAllergies() {
 }
 
 void AddToBox(Allergy allergy) {
-  AllergensData data = AllergensData(id: 0, isChecked: allergy.isSelected);
-  print(data.id);
+  AllergensData data =
+      AllergensData(id: 0, name: allergy.name, isChecked: allergy.isSelected);
+  print(data.name);
   allergensBox.put(data);
 }
 

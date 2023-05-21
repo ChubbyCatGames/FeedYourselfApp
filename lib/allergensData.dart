@@ -4,7 +4,9 @@ import 'package:objectbox/objectbox.dart';
 class AllergensData {
   int id = 0;
 
+  String? name;
+
   bool? isChecked;
 
-  AllergensData({this.id = 0, required this.isChecked});
+  AllergensData({this.id = 0, required this.name, required this.isChecked});
 }
