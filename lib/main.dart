@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:comida/allergensData.dart';
 import 'package:comida/color_schemes.g.dart';
 import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
@@ -22,11 +23,12 @@ import 'package:sembast/sembast_io.dart';
 
 import 'package:objectbox/objectbox.dart';
 import 'productObject.dart';
+import 'allergensData.dart';
 
 import 'objectbox.dart';
 
 late ObjectBox objectBox;
-
+Box allergensBox = objectBox.store.box<AllergensData>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   objectBox = await ObjectBox.create();
@@ -271,7 +273,7 @@ List<bool> isSelected = List<bool>.generate(10, (index) => false);
 
 class AlergiesScreen extends StatefulWidget {
   const AlergiesScreen({Key? key}) : super(key: key);
-  AlergiesScreenState createState()=> AlergiesScreenState();
+  AlergiesScreenState createState() => AlergiesScreenState();
 }
 
 class AlergiesScreenState extends State<AlergiesScreen> {
@@ -298,51 +300,61 @@ class AlergiesScreenState extends State<AlergiesScreen> {
             }
             return Colors.red;
           }
+
           return AllergyTile(
-            allergy: allergiesList[index],
-            imagePath: allergiesList[index].imagePath,
-            onTap: (){
-              allergiesList[index].ChangeBool();
-            }
-          );
+              allergy: allergiesList[index],
+              imagePath: allergiesList[index].imagePath,
+              onTap: () {
+                allergiesList[index].ChangeBool();
+              });
         },
       ),
     );
   }
 }
 
-List<Allergy> CreateAllergies(){
+List<Allergy> CreateAllergies() {
   List<Allergy> allergies = [];
-  Allergy lupine = Allergy(0,'Lupine', 'lib/assets/altramuces.png');
+  Allergy lupine = Allergy(0, 'Lupine', 'lib/assets/altramuces.png');
   allergies.add(lupine);
-  Allergy celery = Allergy(1,'Celery', 'lib/assets/Apio.png');
+  Allergy celery = Allergy(1, 'Celery', 'lib/assets/Apio.png');
   allergies.add(celery);
-  Allergy peanuts = Allergy(2,'Peanuts', 'lib/assets/cacahuetes.png');
+  Allergy peanuts = Allergy(2, 'Peanuts', 'lib/assets/cacahuetes.png');
   allergies.add(peanuts);
-  Allergy crustaceans = Allergy(3,'Crustaceans', 'lib/assets/Crustáceos.png');
+  Allergy crustaceans = Allergy(3, 'Crustaceans', 'lib/assets/Crustáceos.png');
   allergies.add(crustaceans);
-  Allergy gluten = Allergy(4,'Gluten', 'lib/assets/Gluten.png');
+  Allergy gluten = Allergy(4, 'Gluten', 'lib/assets/Gluten.png');
   allergies.add(gluten);
-  Allergy eggs = Allergy(5,'Eggs', 'lib/assets/huevos.png');
+  Allergy eggs = Allergy(5, 'Eggs', 'lib/assets/huevos.png');
   allergies.add(eggs);
-  Allergy dairy = Allergy(6,'Dairy', 'lib/assets/leche.png');
+  Allergy dairy = Allergy(6, 'Dairy', 'lib/assets/leche.png');
   allergies.add(dairy);
-  Allergy mollusks = Allergy(7,'Mollusks', 'lib/assets/moluscos.png');
+  Allergy mollusks = Allergy(7, 'Mollusks', 'lib/assets/moluscos.png');
   allergies.add(mollusks);
-  Allergy mustard = Allergy(8,'Mustard', 'lib/assets/Mostaza.png');
+  Allergy mustard = Allergy(8, 'Mustard', 'lib/assets/Mostaza.png');
   allergies.add(mustard);
-  Allergy nuts = Allergy(9,'Nuts', 'lib/assets/nueces.png');
+  Allergy nuts = Allergy(9, 'Nuts', 'lib/assets/nueces.png');
   allergies.add(nuts);
-  Allergy fish = Allergy(10,'Fish', 'lib/assets/pescado.png');
+  Allergy fish = Allergy(10, 'Fish', 'lib/assets/pescado.png');
   allergies.add(fish);
-  Allergy sesame = Allergy(11,'Sesame', 'lib/assets/Sésamo.png');
+  Allergy sesame = Allergy(11, 'Sesame', 'lib/assets/Sésamo.png');
   allergies.add(sesame);
-  Allergy soy = Allergy(12,'Soy', 'lib/assets/Soja.png');
+  Allergy soy = Allergy(12, 'Soy', 'lib/assets/Soja.png');
   allergies.add(soy);
-  Allergy sulphites = Allergy(13,'Sulphites', 'lib/assets/Sulfitos.png');
+  Allergy sulphites = Allergy(13, 'Sulphites', 'lib/assets/Sulfitos.png');
   allergies.add(sulphites);
 
+  allergies.forEach((element) {
+    AddToBox(element);
+  });
+
   return allergies;
+}
+
+void AddToBox(Allergy allergy) {
+  AllergensData data = AllergensData(id: 0, isChecked: allergy.isSelected);
+  print(data.id);
+  allergensBox.put(data);
 }
 
 //-----------------------------------------------PRODUCT--------------------------------------------------------------
@@ -521,14 +533,19 @@ class Allergy {
   final String imagePath;
   bool? isSelected;
 
-  Allergy(this.id, this.name, this.imagePath){
-    this.isSelected = false;
+  Allergy(this.id, this.name, this.imagePath) {
+    if (allergensBox.contains(this.id + 1)) {
+      AllergensData a = allergensBox.get(this.id + 1);
+      this.isSelected = a.isChecked;
+    } else {
+      this.isSelected = false;
+    }
   }
 
   String get fullId => '$name-$id';
 
-  void ChangeBool(){
-    isSelected = !isSelected!; 
+  void ChangeBool() {
+    isSelected = !isSelected!;
   }
 }
 
@@ -565,13 +582,14 @@ class AllergyTile extends StatefulWidget {
   final String imagePath;
   final VoidCallback? onTap;
 
-  const AllergyTile({Key? key, required this.allergy, required this.imagePath, this.onTap})
+  const AllergyTile(
+      {Key? key, required this.allergy, required this.imagePath, this.onTap})
       : super(key: key);
 
   AllergyTileState createState() => AllergyTileState();
 }
 
-class AllergyTileState extends State<AllergyTile>{
+class AllergyTileState extends State<AllergyTile> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -586,42 +604,43 @@ class AllergyTileState extends State<AllergyTile>{
       }
       return colors.secondaryContainer;
     }
+
     final Checkbox cb = Checkbox(
       checkColor: colors.primaryContainer,
       fillColor: MaterialStateProperty.resolveWith(getColor),
-      value: widget.allergy.isSelected, 
+      value: widget.allergy.isSelected,
       onChanged: (bool? value) {
-          setState(() {
-            widget.allergy.isSelected = value!;
-          });
-      },);
-    return ListTile(
-      leading: SizedBox(
-        width: 100,
-        height: 50,
-        child: Container(
-          // ignore: sort_child_properties_last
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children:[
-              cb,
-              Image.asset(widget.imagePath),
-            ]),
-          //color: allergy.image,
-          margin: const EdgeInsets.all(8),
-        ),
-      ),
-      tileColor: colors.secondaryContainer,
-      textColor: colors.onSecondaryContainer,
-      selectedTileColor: colors.errorContainer,
-      title: Text(widget.allergy.name),
-      onTap: (){
-        //allergiesList[widget.allergy.id].ChangeBool();
-        //print(allergiesList[widget.allergy.id].isSelected.toString());
-        widget.allergy.isSelected = !widget.allergy.isSelected!;
-        cb.onChanged!(widget.allergy.isSelected);
-        }
+        setState(() {
+          widget.allergy.isSelected = value!;
+        });
+      },
     );
+    return ListTile(
+        leading: SizedBox(
+          width: 100,
+          height: 50,
+          child: Container(
+            // ignore: sort_child_properties_last
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  cb,
+                  Image.asset(widget.imagePath),
+                ]),
+            //color: allergy.image,
+            margin: const EdgeInsets.all(8),
+          ),
+        ),
+        tileColor: colors.secondaryContainer,
+        textColor: colors.onSecondaryContainer,
+        selectedTileColor: colors.errorContainer,
+        title: Text(widget.allergy.name),
+        onTap: () {
+          //allergiesList[widget.allergy.id].ChangeBool();
+          //print(allergiesList[widget.allergy.id].isSelected.toString());
+          widget.allergy.isSelected = !widget.allergy.isSelected!;
+          cb.onChanged!(widget.allergy.isSelected);
+        });
   }
 }
 

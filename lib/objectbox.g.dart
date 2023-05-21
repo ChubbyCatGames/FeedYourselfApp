@@ -4,7 +4,7 @@
 // With a Dart package, run `dart run build_runner build`.
 // See also https://docs.objectbox.io/getting-started#generate-objectbox-code
 
-// ignore_for_file: camel_case_types
+// ignore_for_file: camel_case_types, depend_on_referenced_packages
 // coverage:ignore-file
 
 import 'dart:typed_data';
@@ -14,6 +14,7 @@ import 'package:objectbox/internal.dart'; // generated code can access "internal
 import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'allergensData.dart';
 import 'productObject.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
@@ -42,6 +43,25 @@ final _entities = <ModelEntity>[
             flags: 0)
       ],
       relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(2, 6467918117710655503),
+      name: 'AllergensData',
+      lastPropertyId: const IdUid(2, 3196279535286405156),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 651981210591497487),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 3196279535286405156),
+            name: 'isChecked',
+            type: 1,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
 ];
 
@@ -65,7 +85,7 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(1, 5008384711528315705),
+      lastEntityId: const IdUid(2, 6467918117710655503),
       lastIndexId: const IdUid(0, 0),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
@@ -111,6 +131,32 @@ ModelDefinition getObjectBoxModel() {
                 .vTableGetNullable(buffer, rootOffset, 8);
 
           return object;
+        }),
+    AllergensData: EntityDefinition<AllergensData>(
+        model: _entities[1],
+        toOneRelations: (AllergensData object) => [],
+        toManyRelations: (AllergensData object) => {},
+        getId: (AllergensData object) => object.id,
+        setId: (AllergensData object, int id) {
+          object.id = id;
+        },
+        objectToFB: (AllergensData object, fb.Builder fbb) {
+          fbb.startTable(3);
+          fbb.addInt64(0, object.id);
+          fbb.addBool(1, object.isChecked);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = AllergensData(
+              id: const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0),
+              isChecked: const fb.BoolReader()
+                  .vTableGetNullable(buffer, rootOffset, 6));
+
+          return object;
         })
   };
 
@@ -130,4 +176,15 @@ class productObject_ {
   /// see [productObject.ingredients]
   static final ingredients =
       QueryStringProperty<productObject>(_entities[0].properties[2]);
+}
+
+/// [AllergensData] entity fields to define ObjectBox queries.
+class AllergensData_ {
+  /// see [AllergensData.id]
+  static final id =
+      QueryIntegerProperty<AllergensData>(_entities[1].properties[0]);
+
+  /// see [AllergensData.isChecked]
+  static final isChecked =
+      QueryBooleanProperty<AllergensData>(_entities[1].properties[1]);
 }

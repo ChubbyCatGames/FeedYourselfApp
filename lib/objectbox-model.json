@@ -26,9 +26,28 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:6467918117710655503",
+      "lastPropertyId": "2:3196279535286405156",
+      "name": "AllergensData",
+      "properties": [
+        {
+          "id": "1:651981210591497487",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3196279535286405156",
+          "name": "isChecked",
+          "type": 1
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:5008384711528315705",
+  "lastEntityId": "2:6467918117710655503",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
