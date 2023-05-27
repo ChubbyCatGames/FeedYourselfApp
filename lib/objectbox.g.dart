@@ -47,7 +47,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(2, 6467918117710655503),
       name: 'AllergensData',
-      lastPropertyId: const IdUid(3, 7303221391444807547),
+      lastPropertyId: const IdUid(4, 6944445547569296469),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -64,6 +64,11 @@ final _entities = <ModelEntity>[
             id: const IdUid(3, 7303221391444807547),
             name: 'name',
             type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(4, 6944445547569296469),
+            name: 'idAllergy',
+            type: 6,
             flags: 0)
       ],
       relations: <ModelRelation>[],
@@ -148,10 +153,11 @@ ModelDefinition getObjectBoxModel() {
         objectToFB: (AllergensData object, fb.Builder fbb) {
           final nameOffset =
               object.name == null ? null : fbb.writeString(object.name!);
-          fbb.startTable(4);
+          fbb.startTable(5);
           fbb.addInt64(0, object.id);
           fbb.addBool(1, object.isChecked);
           fbb.addOffset(2, nameOffset);
+          fbb.addInt64(3, object.idAllergy);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -161,6 +167,8 @@ ModelDefinition getObjectBoxModel() {
 
           final object = AllergensData(
               id: const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0),
+              idAllergy:
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0),
               name: const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 8),
               isChecked: const fb.BoolReader()
@@ -201,4 +209,8 @@ class AllergensData_ {
   /// see [AllergensData.name]
   static final name =
       QueryStringProperty<AllergensData>(_entities[1].properties[2]);
+
+  /// see [AllergensData.idAllergy]
+  static final idAllergy =
+      QueryIntegerProperty<AllergensData>(_entities[1].properties[3]);
 }

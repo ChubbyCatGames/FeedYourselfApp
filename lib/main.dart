@@ -2,6 +2,7 @@ import 'dart:isolate';
 
 import 'package:comida/allergensData.dart';
 import 'package:comida/color_schemes.g.dart';
+import 'package:comida/objectbox.g.dart';
 import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sqflite/sqflite.dart';
@@ -343,18 +344,25 @@ List<Allergy> CreateAllergies() {
   allergies.add(soy);
   Allergy sulphites = Allergy(13, 'Sulphites', 'lib/assets/Sulfitos.png');
   allergies.add(sulphites);
-
+  //allergensBox.removeAll();
   allergies.forEach((element) {
     AddToBox(element);
+    print(element.isSelected);
   });
 
   return allergies;
 }
 
 void AddToBox(Allergy allergy) {
-  AllergensData data =
-      AllergensData(id: 0, name: allergy.name, isChecked: allergy.isSelected);
-  print(data.name);
+  final query = allergensBox.query(AllergensData_.idAllergy.equals(allergy.id));
+  final search = query.build().findFirst();
+  if (search != null) return;
+  AllergensData data = AllergensData(
+      id: 0,
+      idAllergy: allergy.id,
+      name: allergy.name,
+      isChecked: allergy.isSelected);
+  print(data.name.toString() + data.idAllergy.toString());
   allergensBox.put(data);
 }
 
@@ -535,9 +543,11 @@ class Allergy {
   bool? isSelected;
 
   Allergy(this.id, this.name, this.imagePath) {
-    if (allergensBox.contains(this.id + 1)) {
-      AllergensData a = allergensBox.get(this.id + 1);
-      this.isSelected = a.isChecked;
+    final query = allergensBox.query(AllergensData_.idAllergy.equals(this.id));
+    final data = query.build().findFirst();
+    if (data != null) {
+      print(data.idAllergy.toString() + data.isChecked.toString());
+      this.isSelected = data.isChecked;
     } else {
       this.isSelected = false;
     }
@@ -641,6 +651,15 @@ class AllergyTileState extends State<AllergyTile> {
           //print(allergiesList[widget.allergy.id].isSelected.toString());
           widget.allergy.isSelected = !widget.allergy.isSelected!;
           cb.onChanged!(widget.allergy.isSelected);
+          final query = allergensBox
+              .query(AllergensData_.idAllergy.equals(widget.allergy.id));
+          AllergensData data = query.build().findFirst();
+
+          print(data.name);
+          data.isChecked = widget.allergy.isSelected;
+          print(data.isChecked);
+
+          allergensBox.put(data);
         });
   }
 }
