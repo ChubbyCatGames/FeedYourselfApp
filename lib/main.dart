@@ -56,6 +56,9 @@ var db;
 // Allergies list.
 List<Allergy> allergiesList = CreateAllergies();
 
+// Product list.
+List<Product> productList = [];
+
 class _MyAppState extends State<MyApp> {
   final GoRouter _router = GoRouter(
     initialLocation: '/recents',
@@ -185,58 +188,33 @@ class MyAppShell extends StatelessWidget {
 ///
 ///
 ///-----------------RECENT------------------------------
-class RecentsScreen extends StatelessWidget {
-  var name = "";
-  var ingredients = "";
-  var allergies = "";
-  var store = intMapStoreFactory.store();
+class RecentsScreen extends StatefulWidget {
   RecentsScreen({Key? key}) : super(key: key);
-  SetupDatabase() async {
-    // get the application documents directory
-    var dir = await getApplicationDocumentsDirectory();
-// make sure it exists
-    await dir.create(recursive: true);
-// build the database path
-    var dbPath = join(dir.path, 'productos.db');
-// open the database
-    db = await databaseFactoryIo.openDatabase(dbPath);
+  RecentScreenState createState() => RecentScreenState();
+}
 
-    //var store = StoreRef.main();
-    var key = await store.add(db, {
-      'Pipa': {'Ingredients': 'Muchos', 'Allergies': 'Allergies'}
+class RecentScreenState extends State<RecentsScreen>{
+  int counter = 0;
+  void updateCounter(){
+    setState(() {
+      counter++;
     });
-
-    var record = await store.record(key).getSnapshot(db);
-    name = "Pipa";
-    ingredients = record!['Pipa.Ingredients'] as String;
-    allergies = record!['Pipa.Allergies'] as String;
-
-    // await store.record('Name').put(db, 'Pipa');
-    // await store.record('Ingredients').put(db, "Muchos");
-    // await store.record('Allergies').put(db, "none");
-
-    // name = await store.record('Name').get(db) as String;
-    // ingredients = await store.record('Ingredients').get(db) as String;
-    // allergies = await store.record('Allergies').get(db) as String;
-    print(name + ingredients + allergies);
   }
-
-  @override
+@override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    SetupDatabase();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recents'),
         backgroundColor: colors.primaryContainer,
       ),
       body: ListView.builder(
-        itemCount: 4,
+        itemCount: productList.length,
         itemBuilder: (context, productId) {
-          final product = Producto(name, ingredients, allergies,
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+          //final product = Producto(name, ingredients, allergies,
+          //    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
           return ProductTile(
-            product: product,
+            product: productList[productId],
             onTap: () {
               GoRouter.of(context).go('/recents/product/$productId');
             },
@@ -255,7 +233,15 @@ class RecentsScreen extends StatelessWidget {
 }
 
 void startCamera() async {
-  var result = await BarcodeScanner.scan();
+  var result;
+  try{
+    result = await BarcodeScanner.scan();
+  }
+  catch(e)
+  {
+    print(e);
+    return null;
+  }
 
   print(result.type); // The result type (barcode, cancelled, failed)
   print(result.rawContent); // The barcode content
@@ -266,6 +252,13 @@ void startCamera() async {
     print("esto es un qr");
   } else {
     Future<Product?> product = getProduct(code);
+    final product33 = await product;
+    if(product33 != null){
+      productList.add(product33);
+      /*final myWidgetKey = GlobalKey<RecentScreenState>();
+      final RecentScreenState widgetState = myWidgetKey.currentState!;
+      widgetState.updateCounter();*/
+    }
   }
 }
 
@@ -561,7 +554,7 @@ class Allergy {
 }
 
 class ProductTile extends StatelessWidget {
-  final Producto product;
+  final Product product;
   final VoidCallback? onTap;
 
   const ProductTile({Key? key, required this.product, this.onTap})
@@ -581,8 +574,8 @@ class ProductTile extends StatelessWidget {
       ),
       tileColor: colors.secondaryContainer,
       textColor: colors.onSecondaryContainer,
-      title: Text(product.name),
-      subtitle: Text(product.brand),
+      title: Text(product.productName!),
+      subtitle: Text(product.brands!),
       onTap: onTap,
     );
   }
@@ -654,11 +647,7 @@ class AllergyTileState extends State<AllergyTile> {
           final query = allergensBox
               .query(AllergensData_.idAllergy.equals(widget.allergy.id));
           AllergensData data = query.build().findFirst();
-
-          print(data.name);
           data.isChecked = widget.allergy.isSelected;
-          print(data.isChecked);
-
           allergensBox.put(data);
         });
   }
@@ -689,8 +678,6 @@ Future<Product?> getProduct(String barcode) async {
     if (result.product?.ingredients != null) {
       scanIngredients = result.product?.ingredients as List<Ingredient>;
       if (scanIngredients.isEmpty) {
-        print(
-            "_____________________________________________________________________________________");
         scanIngredients.add(Ingredient(text: await extractIngredient(barcode)));
       }
     }
@@ -708,7 +695,8 @@ Future<Product?> getProduct(String barcode) async {
     print(scanAllergens?.names.toString());
     return result.product;
   } else {
-    throw Exception('product not found, please insert data for $barcode');
+    //throw Exception('product not found, please insert data for $barcode');
+    return null;
   }
 }
 
