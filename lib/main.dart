@@ -389,7 +389,8 @@ class ProductScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                SizedBox(
+                Expanded(
+                  child:SizedBox(
                   width: 200,
                   height: 200,
                   child: Container(
@@ -397,26 +398,45 @@ class ProductScreen extends StatelessWidget {
                     child: Image.network(product.imageFrontSmallUrl!),
                   ),
                 ),
-                Column(
+                ),
+                Expanded(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(product.productName!,
-                          style:
+                      child: Container( 
+                        child: Wrap(
+                          children: [
+                            Flexible(
+                              child:Text(product.productName!,
+                              style:
                               (TextStyle(color: colors.primary, fontSize: 20))),
+                            )
+                          ]
+                        )
+                      )
                     ),
                     FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(
-                        product.productName!,
-                        style: (TextStyle(
-                          color: colors.primary,
-                        )),
-                      ),
+                      child: Container( 
+                        child: Wrap(
+                          children: [
+                            Flexible(
+                              child:Text(
+                                product.brands!,
+                                style: (TextStyle(
+                                color: colors.primary,
+                              )),
+                              ),
+                            )
+                          ]
+                        )
+                      )
                     ),
                   ],
                 ),
+                )
               ],
             ),
             Row(children: [
