@@ -26,6 +26,8 @@ import 'package:objectbox/objectbox.dart';
 import 'productObject.dart';
 import 'allergensData.dart';
 
+import 'dart:convert';
+
 import 'objectbox.dart';
 
 late ObjectBox objectBox;
@@ -200,6 +202,7 @@ class RecentScreenState extends State<RecentsScreen>{
       counter++;
     });
   }
+
 @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -224,7 +227,7 @@ class RecentScreenState extends State<RecentsScreen>{
       floatingActionButton: FloatingActionButton(
           backgroundColor: colors.tertiaryContainer,
           onPressed: () {
-            startCamera();
+            startCamera(context);
           },
           tooltip: 'Camera',
           child: const Icon(Icons.add_a_photo_outlined)),
@@ -232,7 +235,7 @@ class RecentScreenState extends State<RecentsScreen>{
   }
 }
 
-void startCamera() async {
+void startCamera(BuildContext context) async {
   var result;
   try{
     result = await BarcodeScanner.scan();
@@ -255,6 +258,7 @@ void startCamera() async {
     final product33 = await product;
     if(product33 != null){
       productList.add(product33);
+      GoRouter.of(context).go('/recents/product/${productList.indexOf(product33).toString()}');
       /*final myWidgetKey = GlobalKey<RecentScreenState>();
       final RecentScreenState widgetState = myWidgetKey.currentState!;
       widgetState.updateCounter();*/
@@ -371,14 +375,13 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final product = Producto('01011233F', 'TestProduct', 'Hacendado',
-        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg');
+    final product = productList[int.parse(productId!)];
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: colors.primaryContainer,
         title: Text(
-          'Product - ${product.name}',
+          'Product - ${product.productName}',
         ),
       ),
       body: Center(
@@ -391,22 +394,22 @@ class ProductScreen extends StatelessWidget {
                   height: 200,
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    child: Image.network(product.rutaImagen),
+                    child: Image.network(product.imageFrontSmallUrl!),
                   ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(product.name,
+                      fit: BoxFit.scaleDown,
+                      child: Text(product.productName!,
                           style:
                               (TextStyle(color: colors.primary, fontSize: 20))),
                     ),
                     FittedBox(
-                      fit: BoxFit.contain,
+                      fit: BoxFit.scaleDown,
                       child: Text(
-                        product.name,
+                        product.productName!,
                         style: (TextStyle(
                           color: colors.primary,
                         )),
@@ -423,7 +426,7 @@ class ProductScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   color: colors.secondaryContainer,
                   child: Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra leo non tempus congue. Nam iaculis nunc et velit ornare, a imperdiet dui faucibus. Integer ac pharetra tellus, et imperdiet augue. Aenean sit amet velit orci. Aliquam vehicula leo vel lectus tincidunt vestibulum. Nullam enim justo, luctus ut molestie non, eleifend eget elit. Vivamus eros nulla, euismod et commodo tempus, ultricies ut urna. Suspendisse fermentum malesuada dui, vel ultricies quam. Vivamus sed finibus tellus. Phasellus sed mauris sed enim auctor sagittis. Ut molestie in nunc eget lacinia.",
+                    product.ingredientsText!,
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
