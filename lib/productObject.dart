@@ -1,11 +1,20 @@
 import 'package:objectbox/objectbox.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
+
 
 @Entity()
-class productObject {
+class ProductObject {
   @Id()
   int id = 0;
 
-  String? name;
+  int? idProduct;
 
-  String? ingredients;
+  String? barCode;
+
+  ProductObject(
+    {this.id = 0,
+    required this.idProduct,
+    required this.barCode,
+    }
+  );
 }

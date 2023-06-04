@@ -5,8 +5,8 @@
   "entities": [
     {
       "id": "1:5008384711528315705",
-      "lastPropertyId": "3:3276619982039123702",
-      "name": "productObject",
+      "lastPropertyId": "6:4918098849481590416",
+      "name": "ProductObject",
       "properties": [
         {
           "id": "1:1365682112609899515",
@@ -15,13 +15,13 @@
           "flags": 1
         },
         {
-          "id": "2:5354522813894601113",
-          "name": "name",
-          "type": 9
+          "id": "4:532627089929930978",
+          "name": "idProduct",
+          "type": 6
         },
         {
-          "id": "3:3276619982039123702",
-          "name": "ingredients",
+          "id": "6:4918098849481590416",
+          "name": "barCode",
           "type": 9
         }
       ],
@@ -65,7 +65,11 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    5354522813894601113,
+    3276619982039123702,
+    7234717175984047809
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

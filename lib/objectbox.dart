@@ -1,24 +1,13 @@
-import 'productObject.dart';
+import 'ProductObject.dart';
 import 'objectbox.g.dart';
 
 class ObjectBox{
   late final Store store;
 
-  late final Box<productObject> productBox;
+  late final Box<ProductObject> productBox;
 
   ObjectBox._create(this.store){
-    productBox = Box<productObject>(store);
-
-    if(productBox.isEmpty()){
-      _putDemoData();
-    }
-  }
-
-  void _putDemoData(){
-    productObject product1= productObject();
-    productObject product2= productObject();
-    
-    productBox.putMany([product1, product2]);
+    productBox = Box<ProductObject>(store);
   }
 
 
@@ -27,14 +16,14 @@ class ObjectBox{
     return ObjectBox._create(store);
   }
 
-  void addProduct(){
-    productObject newProduct = productObject();
+  /*void addProduct(){
+    ProductObject newProduct = ProductObject();
 
     productBox.put(newProduct);
-  }
+  }*/
 
-  Stream<List<productObject>> getProducts(){
-    final builder = productBox.query()..order(productObject_.id, flags: Order.descending);
+  Stream<List<ProductObject>> getProducts(){
+    final builder = productBox.query()..order(ProductObject_.id, flags: Order.descending);
     return builder.watch(triggerImmediately: true).map((query) => query.find());
   }
 

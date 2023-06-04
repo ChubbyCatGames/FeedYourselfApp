@@ -23,7 +23,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 
 import 'package:objectbox/objectbox.dart';
-import 'productObject.dart';
+import 'ProductObject.dart';
 import 'allergensData.dart';
 
 import 'dart:convert';
@@ -32,9 +32,13 @@ import 'objectbox.dart';
 
 late ObjectBox objectBox;
 Box allergensBox = objectBox.store.box<AllergensData>();
+Box productBox = objectBox.store.box<ProductObject>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   objectBox = await ObjectBox.create();
+
+  InitProducts();
 
   runApp(const MyApp());
 }
@@ -206,6 +210,8 @@ class RecentScreenState extends State<RecentsScreen>{
 @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    productBox.removeAll();
+    InitProducts();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recents'),
@@ -235,6 +241,31 @@ class RecentScreenState extends State<RecentsScreen>{
   }
 }
 
+void InitProducts(){
+  List<ProductObject> prodList = productBox.getAll() as List<ProductObject>;
+    if(prodList.isNotEmpty){
+      prodList.forEach((element) async {
+        print(prodList.length);
+        print(element.barCode);
+        Future<Product?> product = getProduct(element.barCode!);
+        var product33 = await product;
+
+        //  Check if already exists.
+        bool contains = false;
+        int index = 0;
+        productList.forEach((element) {
+        if(element.barcode == product33?.barcode){
+          contains = true;
+          index = productList.indexOf(element);
+        }
+        });
+        if(!contains){
+          productList.add(product33!);
+        }
+      });
+    }
+}
+
 void startCamera(BuildContext context) async {
   var result;
   try{
@@ -246,25 +277,48 @@ void startCamera(BuildContext context) async {
     return null;
   }
 
-  print(result.type); // The result type (barcode, cancelled, failed)
-  print(result.rawContent); // The barcode content
-  print(result.format); // The barcode format (as enum)
   String code = result.rawContent;
 
   if (result.format == 'qr') {
     print("esto es un qr");
   } else {
-    Future<Product?> product = getProduct(code);
-    final product33 = await product;
+    
+    var product  = getProduct(code);
+    var product33 = await product;
+
     if(product33 != null){
-      productList.add(product33);
+      bool contains = false;
+      int index = 0;
+      productList.forEach((element) {
+        if(element.barcode == product33?.barcode){
+          contains = true;
+          index = productList.indexOf(element);
+        }
+      });
+
+      if(!contains){
+        productList.add(product33);
+      }else{
+        product33 = productList[index];
+      }
+
+      // Check if already exists
+      final query = productBox.query(ProductObject_.barCode.equals(code));
+      final search = query.build().findFirst();
+      if(search != null){
+        // Add the product to the database
+        ProductObject productObject = ProductObject(idProduct: productList.indexOf(product33), barCode: product33.barcode);
+        productBox.put(productObject);
+      }
       GoRouter.of(context).go('/recents/product/${productList.indexOf(product33).toString()}');
       /*final myWidgetKey = GlobalKey<RecentScreenState>();
       final RecentScreenState widgetState = myWidgetKey.currentState!;
       widgetState.updateCounter();*/
     }
+    
   }
 }
+
 
 //----------------------------ALLERGIES----------------------------------------
 List<bool> isSelected = List<bool>.generate(10, (index) => false);
@@ -359,7 +413,6 @@ void AddToBox(Allergy allergy) {
       idAllergy: allergy.id,
       name: allergy.name,
       isChecked: allergy.isSelected);
-  print(data.name.toString() + data.idAllergy.toString());
   allergensBox.put(data);
 }
 
@@ -408,7 +461,7 @@ class ProductScreen extends StatelessWidget {
                       child: Container( 
                         child: Wrap(
                           children: [
-                            Flexible(
+                            Container(
                               child:Text(product.productName!,
                               style:
                               (TextStyle(color: colors.primary, fontSize: 20))),
@@ -422,7 +475,7 @@ class ProductScreen extends StatelessWidget {
                       child: Container( 
                         child: Wrap(
                           children: [
-                            Flexible(
+                            Container(
                               child:Text(
                                 product.brands!,
                                 style: (TextStyle(
@@ -446,7 +499,7 @@ class ProductScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   color: colors.secondaryContainer,
                   child: Text(
-                    product.ingredientsText!,
+                    product.ingredientsText?.toString() ?? 'No hay ingredientes en la base de datos de OpenFoodFacts',
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
@@ -592,7 +645,7 @@ class ProductTile extends StatelessWidget {
         height: 50,
         child: Container(
           child: Image.network(
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+              product.imageFrontSmallUrl!),
         ),
       ),
       tileColor: colors.secondaryContainer,
