@@ -67,7 +67,7 @@ List<Product> productList = [];
 
 class _MyAppState extends State<MyApp> {
   final GoRouter _router = GoRouter(
-    initialLocation: '/recents',
+    initialLocation: '/load',
     routes: <RouteBase>[
       ShellRoute(
         builder: (BuildContext context, GoRouterState state, Widget child) {
@@ -100,6 +100,15 @@ class _MyAppState extends State<MyApp> {
             pageBuilder: (context, state) {
               return FadeTransitionPage(
                 child: const AlergiesScreen(),
+                key: state.pageKey,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/load',
+            pageBuilder: (context, state) {
+              return FadeTransitionPage(
+                child: LoadScreen(),
                 key: state.pageKey,
               );
             },
@@ -193,6 +202,39 @@ class MyAppShell extends StatelessWidget {
 //////////////////////////////////////////////////
 ///
 ///
+///
+///---------------LOAD----------------------
+class LoadScreen extends StatefulWidget {
+  LoadScreen({Key? key}) : super(key: key);
+  LoadScreenState createState() => LoadScreenState();
+}
+
+class LoadScreenState extends State<LoadScreen>{
+  
+@override
+  Widget build(BuildContext context){
+    final colors = Theme.of(context).colorScheme;
+
+    InitProducts();
+
+    return Scaffold(
+      floatingActionButton: Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.5,
+            child: FloatingActionButton(
+              onPressed: () {
+                GoRouter.of(context).go('/recents');
+              },
+              child: Text('Get started'),
+            ),
+          ),
+        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
+
+
 ///-----------------RECENT------------------------------
 class RecentsScreen extends StatefulWidget {
   RecentsScreen({Key? key}) : super(key: key);
@@ -210,7 +252,6 @@ class RecentScreenState extends State<RecentsScreen>{
 @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    productBox.removeAll();
     InitProducts();
     return Scaffold(
       appBar: AppBar(
@@ -245,15 +286,13 @@ void InitProducts(){
   List<ProductObject> prodList = productBox.getAll() as List<ProductObject>;
     if(prodList.isNotEmpty){
       prodList.forEach((element) async {
-        print(prodList.length);
-        print(element.barCode);
         Future<Product?> product = getProduct(element.barCode!);
         var product33 = await product;
 
         //  Check if already exists.
         bool contains = false;
         int index = 0;
-        productList.forEach((element) {
+        productList.reversed.forEach((element) {
         if(element.barcode == product33?.barcode){
           contains = true;
           index = productList.indexOf(element);
@@ -305,7 +344,7 @@ void startCamera(BuildContext context) async {
       // Check if already exists
       final query = productBox.query(ProductObject_.barCode.equals(code));
       final search = query.build().findFirst();
-      if(search != null){
+      if(search == null){
         // Add the product to the database
         ProductObject productObject = ProductObject(idProduct: productList.indexOf(product33), barCode: product33.barcode);
         productBox.put(productObject);
