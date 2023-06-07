@@ -209,31 +209,29 @@ class LoadScreen extends StatefulWidget {
   LoadScreenState createState() => LoadScreenState();
 }
 
-class LoadScreenState extends State<LoadScreen>{
-  
-@override
-  Widget build(BuildContext context){
+class LoadScreenState extends State<LoadScreen> {
+  @override
+  Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
     InitProducts();
 
     return Scaffold(
       floatingActionButton: Center(
-          child: FractionallySizedBox(
-            widthFactor: 0.5,
-            child: FloatingActionButton(
-              onPressed: () {
-                GoRouter.of(context).go('/recents');
-              },
-              child: Text('Get started'),
-            ),
+        child: FractionallySizedBox(
+          widthFactor: 0.5,
+          child: FloatingActionButton(
+            onPressed: () {
+              GoRouter.of(context).go('/recents');
+            },
+            child: Text('Get started'),
           ),
         ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
-
 
 ///-----------------RECENT------------------------------
 class RecentsScreen extends StatefulWidget {
@@ -241,15 +239,15 @@ class RecentsScreen extends StatefulWidget {
   RecentScreenState createState() => RecentScreenState();
 }
 
-class RecentScreenState extends State<RecentsScreen>{
+class RecentScreenState extends State<RecentsScreen> {
   int counter = 0;
-  void updateCounter(){
+  void updateCounter() {
     setState(() {
       counter++;
     });
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     InitProducts();
@@ -282,36 +280,36 @@ class RecentScreenState extends State<RecentsScreen>{
   }
 }
 
-void InitProducts(){
+void InitProducts() {
   List<ProductObject> prodList = productBox.getAll() as List<ProductObject>;
-    if(prodList.isNotEmpty){
-      prodList.forEach((element) async {
-        Future<Product?> product = getProduct(element.barCode!);
-        var product33 = await product;
+  print(prodList.length);
+  if (prodList.isNotEmpty) {
+    prodList.forEach((element) async {
+      print(element.barCode);
+      Future<Product?> product = getProduct(element.barCode!);
+      var product33 = await product;
 
-        //  Check if already exists.
-        bool contains = false;
-        int index = 0;
-        productList.reversed.forEach((element) {
-        if(element.barcode == product33?.barcode){
+      //  Check if already exists.
+      bool contains = false;
+      int index = 0;
+      productList.reversed.forEach((element) {
+        if (element.barcode == product33?.barcode) {
           contains = true;
           index = productList.indexOf(element);
         }
-        });
-        if(!contains){
-          productList.add(product33!);
-        }
       });
-    }
+      if (!contains) {
+        productList.add(product33!);
+      }
+    });
+  }
 }
 
 void startCamera(BuildContext context) async {
   var result;
-  try{
+  try {
     result = await BarcodeScanner.scan();
-  }
-  catch(e)
-  {
+  } catch (e) {
     print(e);
     return null;
   }
@@ -321,43 +319,43 @@ void startCamera(BuildContext context) async {
   if (result.format == 'qr') {
     print("esto es un qr");
   } else {
-    
-    var product  = getProduct(code);
+    var product = getProduct(code);
     var product33 = await product;
 
-    if(product33 != null){
+    if (product33 != null) {
       bool contains = false;
       int index = 0;
       productList.forEach((element) {
-        if(element.barcode == product33?.barcode){
+        if (element.barcode == product33?.barcode) {
           contains = true;
           index = productList.indexOf(element);
         }
       });
 
-      if(!contains){
+      if (!contains) {
         productList.add(product33);
-      }else{
+      } else {
         product33 = productList[index];
       }
 
       // Check if already exists
       final query = productBox.query(ProductObject_.barCode.equals(code));
       final search = query.build().findFirst();
-      if(search == null){
+      if (search == null) {
         // Add the product to the database
-        ProductObject productObject = ProductObject(idProduct: productList.indexOf(product33), barCode: product33.barcode);
+        ProductObject productObject = ProductObject(
+            idProduct: productList.indexOf(product33),
+            barCode: product33.barcode);
         productBox.put(productObject);
       }
-      GoRouter.of(context).go('/recents/product/${productList.indexOf(product33).toString()}');
+      GoRouter.of(context)
+          .go('/recents/product/${productList.indexOf(product33).toString()}');
       /*final myWidgetKey = GlobalKey<RecentScreenState>();
       final RecentScreenState widgetState = myWidgetKey.currentState!;
       widgetState.updateCounter();*/
     }
-    
   }
 }
-
 
 //----------------------------ALLERGIES----------------------------------------
 List<bool> isSelected = List<bool>.generate(10, (index) => false);
@@ -482,52 +480,44 @@ class ProductScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child:SizedBox(
-                  width: 200,
-                  height: 200,
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    child: Image.network(product.imageFrontSmallUrl!),
+                  child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      child: Image.network(product.imageFrontSmallUrl!),
+                    ),
                   ),
-                ),
                 ),
                 Expanded(
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Container( 
-                        child: Wrap(
-                          children: [
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Container(
+                              child: Wrap(children: [
                             Container(
-                              child:Text(product.productName!,
-                              style:
-                              (TextStyle(color: colors.primary, fontSize: 20))),
+                              child: Text(product.productName!,
+                                  style: (TextStyle(
+                                      color: colors.primary, fontSize: 20))),
                             )
-                          ]
-                        )
-                      )
-                    ),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Container( 
-                        child: Wrap(
-                          children: [
+                          ]))),
+                      FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Container(
+                              child: Wrap(children: [
                             Container(
-                              child:Text(
+                              child: Text(
                                 product.brands!,
                                 style: (TextStyle(
-                                color: colors.primary,
-                              )),
+                                  color: colors.primary,
+                                )),
                               ),
                             )
-                          ]
-                        )
-                      )
-                    ),
-                  ],
-                ),
+                          ]))),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -538,7 +528,8 @@ class ProductScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   color: colors.secondaryContainer,
                   child: Text(
-                    product.ingredientsText?.toString() ?? 'No hay ingredientes en la base de datos de OpenFoodFacts',
+                    product.ingredientsText?.toString() ??
+                        'No hay ingredientes en la base de datos de OpenFoodFacts',
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
@@ -551,16 +542,28 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
+bool? CheckAllergies(List<String>? allergens) {
+  bool? hasAllergen = false;
+  allergiesList.forEach((element) {
+    if (!element.isSelected!) return;
+    hasAllergen = allergens?.contains(element.name.toLowerCase());
+  });
+  print(hasAllergen);
+  return hasAllergen;
+}
+
 ///-----------------------PRODUCT SCREEN CAMERA
 class ProductScreenCamera extends StatelessWidget {
   final String? productName;
   final List<Ingredient>? productIngredients;
   final Allergens? allergies;
+  final bool? hasAllergen;
 
   const ProductScreenCamera({
     required this.productName,
     required this.productIngredients,
     required this.allergies,
+    required this.hasAllergen,
     Key? key,
   }) : super(key: key);
 
@@ -683,8 +686,7 @@ class ProductTile extends StatelessWidget {
         width: 50,
         height: 50,
         child: Container(
-          child: Image.network(
-              product.imageFrontSmallUrl!),
+          child: Image.network(product.imageFrontSmallUrl!),
         ),
       ),
       tileColor: colors.secondaryContainer,
@@ -799,15 +801,18 @@ Future<Product?> getProduct(String barcode) async {
     if (result.product?.allergens != null) {
       scanAllergens = result.product?.allergens as Allergens?;
     }
+    bool? hasAllergen = CheckAllergies(scanAllergens?.names);
     ProductScreenCamera(
       productName: scanName,
       productIngredients: scanIngredients,
       allergies: scanAllergens,
+      hasAllergen: hasAllergen,
     );
-    print("hola");
-    print(scanName.toString());
-    print(scanIngredients.toString());
+    //print("hola");
+    //print(scanName.toString());
+    //print(scanIngredients.toString());
     print(scanAllergens?.names.toString());
+
     return result.product;
   } else {
     //throw Exception('product not found, please insert data for $barcode');
