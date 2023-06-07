@@ -416,7 +416,7 @@ List<Allergy> CreateAllergies() {
   allergies.add(gluten);
   Allergy eggs = Allergy(5, 'Eggs', 'lib/assets/huevos.png');
   allergies.add(eggs);
-  Allergy dairy = Allergy(6, 'Dairy', 'lib/assets/leche.png');
+  Allergy dairy = Allergy(6, 'Milk', 'lib/assets/leche.png');
   allergies.add(dairy);
   Allergy mollusks = Allergy(7, 'Mollusks', 'lib/assets/moluscos.png');
   allergies.add(mollusks);
@@ -428,7 +428,7 @@ List<Allergy> CreateAllergies() {
   allergies.add(fish);
   Allergy sesame = Allergy(11, 'Sesame', 'lib/assets/Sésamo.png');
   allergies.add(sesame);
-  Allergy soy = Allergy(12, 'Soy', 'lib/assets/Soja.png');
+  Allergy soy = Allergy(12, 'Soybeans', 'lib/assets/Soja.png');
   allergies.add(soy);
   Allergy sulphites = Allergy(13, 'Sulphites', 'lib/assets/Sulfitos.png');
   allergies.add(sulphites);
@@ -545,9 +545,10 @@ class ProductScreen extends StatelessWidget {
 bool? CheckAllergies(List<String>? allergens) {
   bool? hasAllergen = false;
   allergiesList.forEach((element) {
-    if (!element.isSelected!) return;
+    if (!element.isSelected! || hasAllergen == true) return;
     hasAllergen = allergens?.contains(element.name.toLowerCase());
   });
+
   print(hasAllergen);
   return hasAllergen;
 }
@@ -607,7 +608,7 @@ class ProductScreenCamera extends StatelessWidget {
                       child: Text(
                         product.name,
                         style: (TextStyle(
-                          color: colors.primary,
+                          color: colors.secondary,
                         )),
                       ),
                     ),
@@ -681,6 +682,12 @@ class ProductTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    Color? c;
+    if (CheckAllergies(product.allergens?.names)!) {
+      c = colors.errorContainer;
+    } else {
+      c = colors.secondaryContainer;
+    }
     return ListTile(
       leading: SizedBox(
         width: 50,
@@ -689,7 +696,7 @@ class ProductTile extends StatelessWidget {
           child: Image.network(product.imageFrontSmallUrl!),
         ),
       ),
-      tileColor: colors.secondaryContainer,
+      tileColor: c,
       textColor: colors.onSecondaryContainer,
       title: Text(product.productName!),
       subtitle: Text(product.brands!),
