@@ -1,5 +1,7 @@
 import 'package:objectbox/objectbox.dart';
 
+
+// Clase utilizada para convertir correctamente la información de la alergia para almacenarla en la base de datos.
 @Entity()
 class AllergensData {
   int id = 0;

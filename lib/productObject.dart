@@ -1,7 +1,7 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
-
+// Clase utilizada para convertir correctamente la información del producto para almacenarla en la base de datos.
 @Entity()
 class ProductObject {
   @Id()

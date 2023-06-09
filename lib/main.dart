@@ -30,10 +30,12 @@ import 'dart:convert';
 
 import 'objectbox.dart';
 
+// ObjectBox utilizadas para guardar los datos y garantizar la persistencia de las alergias y de los productos recientes.
 late ObjectBox objectBox;
 Box allergensBox = objectBox.store.box<AllergensData>();
 Box productBox = objectBox.store.box<ProductObject>();
 
+// MAIN.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   objectBox = await ObjectBox.create();
@@ -54,18 +56,21 @@ class MyApp extends StatefulWidget {
 ////////////////////////////////////////////////////////////////////////////////////////
 ////GLOBALES
 ///
-var scanName = "";
-List<Ingredient> scanIngredients = [];
-Allergens? scanAllergens;
-var db;
 
-// Allergies list.
-List<Allergy> allergiesList = CreateAllergies();
+// Variables.
+var scanName = ""; // Variable usada para escanear.
+List<Ingredient> scanIngredients = []; // Ingredientes escaneados.
+Allergens? scanAllergens; // Alérgenos escaneados.
 
-// Product list.
-List<Product> productList = [];
+// Lista de alergias.
+List<Allergy> allergiesList = CreateAllergies(); // Lista de alergias.
 
+// Lista de productos.
+List<Product> productList = []; // Lista de productas.
+
+// MyAppState.
 class _MyAppState extends State<MyApp> {
+  // declaración de GoRouter para navegar entre pantallas.
   final GoRouter _router = GoRouter(
     initialLocation: '/load',
     routes: <RouteBase>[
@@ -118,7 +123,7 @@ class _MyAppState extends State<MyApp> {
     ],
   );
 
-  // This widget is the root of your application.
+  // Este Widget es la raíz de la app.
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -141,6 +146,7 @@ class _MyAppState extends State<MyApp> {
 
 //////////////////////////////////////////////////////////////SHELL////////////////////////////////////////////////////////////////
 
+// El envoltorio de la app que recubre varios de los Widgets.
 class MyAppShell extends StatelessWidget {
   final Widget child;
 
@@ -174,6 +180,7 @@ class MyAppShell extends StatelessWidget {
     );
   }
 
+  // Calcular el índice del GoRouter.
   static int _calculateSelectedIndex(BuildContext context) {
     final GoRouter route = GoRouter.of(context);
     final String location = route.location;
@@ -184,6 +191,7 @@ class MyAppShell extends StatelessWidget {
     }
   }
 
+  // En esta función se viaja a una nueva ruta dependiendo del índice.
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 1:
@@ -204,6 +212,7 @@ class MyAppShell extends StatelessWidget {
 ///
 ///
 ///---------------LOAD----------------------
+// Esta pantalla sale al iniciar la aplicación y sirve como pantalla de carga así como de menú inicial.
 class LoadScreen extends StatefulWidget {
   LoadScreen({Key? key}) : super(key: key);
   LoadScreenState createState() => LoadScreenState();
@@ -234,6 +243,7 @@ class LoadScreenState extends State<LoadScreen> {
 }
 
 ///-----------------RECENT------------------------------
+// En esta pantalla se muestran los productos escaneados recientemente.
 class RecentsScreen extends StatefulWidget {
   RecentsScreen({Key? key}) : super(key: key);
   RecentScreenState createState() => RecentScreenState();
@@ -280,12 +290,11 @@ class RecentScreenState extends State<RecentsScreen> {
   }
 }
 
+// Función que sirve para inciar los productos desde la base de datos.
 void InitProducts() {
   List<ProductObject> prodList = productBox.getAll() as List<ProductObject>;
-  print(prodList.length);
   if (prodList.isNotEmpty) {
     prodList.forEach((element) async {
-      print(element.barCode);
       Future<Product?> product = getProduct(element.barCode!);
       var product33 = await product;
 
@@ -305,6 +314,7 @@ void InitProducts() {
   }
 }
 
+// Función que inicia la cámara.
 void startCamera(BuildContext context) async {
   var result;
   try {
@@ -332,17 +342,18 @@ void startCamera(BuildContext context) async {
         }
       });
 
+      // Esto evita que el producto se añada dos veces.
       if (!contains) {
         productList.add(product33);
       } else {
         product33 = productList[index];
       }
 
-      // Check if already exists
+      // Comprobar si ya existe.
       final query = productBox.query(ProductObject_.barCode.equals(code));
       final search = query.build().findFirst();
       if (search == null) {
-        // Add the product to the database
+        // Añadir los productos a la base de datos.
         ProductObject productObject = ProductObject(
             idProduct: productList.indexOf(product33),
             barCode: product33.barcode);
@@ -358,6 +369,7 @@ void startCamera(BuildContext context) async {
 }
 
 //----------------------------ALLERGIES----------------------------------------
+// Pantalla de las alergias.
 List<bool> isSelected = List<bool>.generate(10, (index) => false);
 
 class AlergiesScreen extends StatefulWidget {
@@ -394,6 +406,7 @@ class AlergiesScreenState extends State<AlergiesScreen> {
               allergy: allergiesList[index],
               imagePath: allergiesList[index].imagePath,
               onTap: () {
+                // Al pulsar en la casilla de una alergia, se cambia la alergia.
                 allergiesList[index].ChangeBool();
               });
         },
@@ -402,6 +415,7 @@ class AlergiesScreenState extends State<AlergiesScreen> {
   }
 }
 
+// Función para crear las alergias al inicio.
 List<Allergy> CreateAllergies() {
   List<Allergy> allergies = [];
   Allergy lupine = Allergy(0, 'Lupine', 'lib/assets/altramuces.png');
@@ -435,12 +449,12 @@ List<Allergy> CreateAllergies() {
   //allergensBox.removeAll();
   allergies.forEach((element) {
     AddToBox(element);
-    print(element.isSelected);
   });
 
   return allergies;
 }
 
+// Añadir una alergia a la base de datos.
 void AddToBox(Allergy allergy) {
   final query = allergensBox.query(AllergensData_.idAllergy.equals(allergy.id));
   final search = query.build().findFirst();
@@ -454,6 +468,7 @@ void AddToBox(Allergy allergy) {
 }
 
 //-----------------------------------------------PRODUCT--------------------------------------------------------------
+// Pantalla del producto, donde se muestra la información sobre el mismo.
 class ProductScreen extends StatelessWidget {
   final String? productId;
 
@@ -466,6 +481,12 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final product = productList[int.parse(productId!)];
+    Color? c;
+    if (CheckAllergies(product.allergens?.names)!) {
+      c = colors.errorContainer;
+    } else {
+      c = colors.secondaryContainer;
+    }
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
@@ -534,6 +555,20 @@ class ProductScreen extends StatelessWidget {
                   ),
                 ),
               )
+            ]),
+            Row(children: [
+              Flexible(
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
+                  color: c,
+                  child: Text(
+                    product.allergens?.names.toString() ??
+                        'No hay alergias para este producto',
+                    style: TextStyle(color: colors.onSecondaryContainer),
+                  ),
+                ),
+              )
             ])
           ],
         ),
@@ -542,6 +577,7 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
+// Función para comprobar si el producto contiene alguna de las alergias seleccionadas y por tanto no puede comerlo.
 bool? CheckAllergies(List<String>? allergens) {
   bool? hasAllergen = false;
   allergiesList.forEach((element) {
@@ -549,7 +585,6 @@ bool? CheckAllergies(List<String>? allergens) {
     hasAllergen = allergens?.contains(element.name.toLowerCase());
   });
 
-  print(hasAllergen);
   return hasAllergen;
 }
 
@@ -657,8 +692,8 @@ class Allergy {
   Allergy(this.id, this.name, this.imagePath) {
     final query = allergensBox.query(AllergensData_.idAllergy.equals(this.id));
     final data = query.build().findFirst();
+    // Si hay información en la base de datos sobre una alergia, se inicializa rescatando esa información.
     if (data != null) {
-      print(data.idAllergy.toString() + data.isChecked.toString());
       this.isSelected = data.isChecked;
     } else {
       this.isSelected = false;
@@ -672,6 +707,7 @@ class Allergy {
   }
 }
 
+// Las casillas donde se muestran los productos en la pantalla de recientes.
 class ProductTile extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
@@ -705,6 +741,7 @@ class ProductTile extends StatelessWidget {
   }
 }
 
+// Las casillas donde se muestran las alergias en la pantalla de alergias.
 class AllergyTile extends StatefulWidget {
   final Allergy allergy;
   final String imagePath;
@@ -764,8 +801,6 @@ class AllergyTileState extends State<AllergyTile> {
         selectedTileColor: colors.errorContainer,
         title: Text(widget.allergy.name),
         onTap: () {
-          //allergiesList[widget.allergy.id].ChangeBool();
-          //print(allergiesList[widget.allergy.id].isSelected.toString());
           widget.allergy.isSelected = !widget.allergy.isSelected!;
           cb.onChanged!(widget.allergy.isSelected);
           final query = allergensBox
@@ -815,10 +850,6 @@ Future<Product?> getProduct(String barcode) async {
       allergies: scanAllergens,
       hasAllergen: hasAllergen,
     );
-    //print("hola");
-    //print(scanName.toString());
-    //print(scanIngredients.toString());
-    print(scanAllergens?.names.toString());
 
     return result.product;
   } else {
