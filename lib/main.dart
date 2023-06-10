@@ -242,6 +242,7 @@ class LoadScreenState extends State<LoadScreen> {
   }
 }
 
+
 ///-----------------RECENT------------------------------
 // En esta pantalla se muestran los productos escaneados recientemente.
 class RecentsScreen extends StatefulWidget {
@@ -547,10 +548,10 @@ class ProductScreen extends StatelessWidget {
                 child: Container(
                   margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.all(8),
-                  color: colors.secondaryContainer,
+                  color: c,
                   child: Text(
-                    product.ingredientsText?.toString() ??
-                        'No hay ingredientes en la base de datos de OpenFoodFacts',
+                    product.allergens?.names.toString() ??
+                        'No hay alergias para este producto',
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
@@ -561,15 +562,15 @@ class ProductScreen extends StatelessWidget {
                 child: Container(
                   margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.all(8),
-                  color: c,
+                  color: colors.secondaryContainer,
                   child: Text(
-                    product.allergens?.names.toString() ??
-                        'No hay alergias para este producto',
+                    product.ingredientsText?.toString() ??
+                        'No hay ingredientes en la base de datos de OpenFoodFacts',
                     style: TextStyle(color: colors.onSecondaryContainer),
                   ),
                 ),
               )
-            ])
+            ]),
           ],
         ),
       ),
@@ -771,7 +772,7 @@ class AllergyTileState extends State<AllergyTile> {
     }
 
     final Checkbox cb = Checkbox(
-      checkColor: colors.primaryContainer,
+      checkColor: colors.surfaceVariant,
       fillColor: MaterialStateProperty.resolveWith(getColor),
       value: widget.allergy.isSelected,
       onChanged: (bool? value) {
